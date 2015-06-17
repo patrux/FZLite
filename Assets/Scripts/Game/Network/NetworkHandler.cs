@@ -5,7 +5,7 @@ using UdpKit;
 using Bolt;
 
 // Contains the events for server and client
-public class UIScreenLobby : Bolt.GlobalEventListener
+public class NetworkHandler : Bolt.GlobalEventListener
 {
     UIMenuHandler menuHandler;
     
@@ -68,7 +68,7 @@ public class UIScreenLobby : Bolt.GlobalEventListener
         else if (BoltNetwork.isClient) // CONNECT TO THE SERVER
         {
             // Store loadout etc here
-            ConnectToken ct = new ConnectToken(PlayerSettings.GetPlayerName(), lobbyReady);
+            ConnectToken ct = new ConnectToken(PlayerSettings.GetPlayerName(), UIScreenLobby.lobbyReady);
 
             // Enter lobby on client screen
             menuHandler.EnterLobby();
@@ -90,7 +90,7 @@ public class UIScreenLobby : Bolt.GlobalEventListener
         lobbyScreen.SetLobbyName(false, cct.playerName);
 
         // Create a token for listenserver and send to client as a token
-        ConnectToken sct = new ConnectToken(PlayerSettings.GetPlayerName(), lobbyReady);
+        ConnectToken sct = new ConnectToken(PlayerSettings.GetPlayerName(), UIScreenLobby.lobbyReady);
 
         BoltNetwork.Accept(_endPoint, sct);
     }

@@ -12,7 +12,6 @@ public class UIChatInput : Bolt.GlobalEventListener
 
     // Input History
     List<string> inputHistory = new List<string>();
-
     int historyCap = 15;
     int historyIndex = 0;
 
@@ -33,7 +32,7 @@ public class UIChatInput : Bolt.GlobalEventListener
     /// <summary>
     /// Clears the chat.
     /// </summary>
-    /// <param name="_fullClear">Set to true to remove chat history aswell.</param>
+    /// <param name="_fullClear">If true, it will clear chat history aswell.</param>
     public void ClearChat(bool _fullClear)
     {
         textList.Clear();
@@ -92,7 +91,7 @@ public class UIChatInput : Bolt.GlobalEventListener
     }
 
     /// <summary>
-    /// Submit notification is sent by UIInput when 'enter' is pressed or iOS/Android keyboard finalizes input.
+    /// When the local player submits a new message.
     /// </summary>
     public void OnSubmit()
     {
@@ -107,7 +106,7 @@ public class UIChatInput : Bolt.GlobalEventListener
             if (HandleChatCommand.IsAChatCommand(input))
             {
                 // The string started with "/" so treat it as a command
-                HandleChatCommand.instance.HandleCommand(input.Substring(1, uiInput.value.Length - 1));
+                HandleChatCommand.instance.HandleCommand(input.Substring(1, input.Length - 1));
                 AddToHistory(input);
                 scrollBar.value = 1f;
             }

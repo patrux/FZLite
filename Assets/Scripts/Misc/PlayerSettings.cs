@@ -53,17 +53,17 @@ public class PlayerSettings : MonoBehaviour
 
     // Keybinds
     string keyBindPrefix = "keybind_";
-    KeyCode keyMoveUp;
-    KeyCode keyMoveDown;
-    KeyCode keyMoveLeft;
-    KeyCode keyMoveRight;
-    KeyCode keyAttack1;
-    KeyCode keyAttack2;
-    KeyCode keyCancelCast;
+    public static KeyCode keyMoveUp;
+    public static KeyCode keyMoveDown;
+    public static KeyCode keyMoveLeft;
+    public static KeyCode keyMoveRight;
+    public static KeyCode keyAttack1;
+    public static KeyCode keyAttack2;
+    public static KeyCode keyCancelCast;
 
     // Unchangeable keys
-    KeyCode keyEscape = KeyCode.Escape;
-    KeyCode keyReloadSettings = KeyCode.F9;
+    public static KeyCode keyEscape = KeyCode.Escape;
+    public static KeyCode keyReloadSettings = KeyCode.F9;
 
     void Start()
     {
@@ -77,12 +77,6 @@ public class PlayerSettings : MonoBehaviour
             LoadSettings();
             Debug.Log("[Settings Loaded]");
         }
-
-        //    if (Input.GetKeyDown(keyEscape))
-        //    {
-        //        SaveSettingsToFileAux();
-        //        Debug.Log("[Settings Saved]");
-        //    }
     }
 
     /// <summary>

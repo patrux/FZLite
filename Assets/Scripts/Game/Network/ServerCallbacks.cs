@@ -1,15 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ServerCallbacks : MonoBehaviour {
+[BoltGlobalBehaviour(BoltNetworkModes.Host)]
+public class ServerCallbacks : Bolt.GlobalEventListener 
+{
+    //public override void Connected(BoltConnection connection)
+    //{
+    //    ConnectToken sct = (ConnectToken)connection.AcceptToken;
+    //    Debug.Log("[Connected] player[" + sct.playerName + "]");
+    //}
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    //public override void Disconnected(BoltConnection connection)
+    //{
+    //}
 }

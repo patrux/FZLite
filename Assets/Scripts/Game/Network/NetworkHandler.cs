@@ -26,6 +26,13 @@ public class NetworkHandler : Bolt.GlobalEventListener
         menuHandler = GameObject.Find("MenuScripts").GetComponent<UIMenuHandler>();
     }
 
+    public override void BoltStartBegin()
+    {
+        // Register token classes with Bolt
+        BoltNetwork.RegisterTokenClass<ConnectToken>();
+        BoltNetwork.RegisterTokenClass<ControlGainedToken>();
+    }
+
     /// <summary>
     /// Create new server and enter lobby.
     /// </summary>
@@ -53,12 +60,6 @@ public class NetworkHandler : Bolt.GlobalEventListener
         WriteLine("Attempting to join " + _ip + ":" + _port);
     }
 
-    public override void BoltStartBegin()
-    {
-        // Register token classes with Bolt
-        BoltNetwork.RegisterTokenClass<ConnectToken>();
-    }
-
     public override void BoltStartDone()
     {
         if (BoltNetwork.isServer)
@@ -70,8 +71,7 @@ public class NetworkHandler : Bolt.GlobalEventListener
             // Store loadout etc here
             ConnectToken ct = new ConnectToken(PlayerSettings.GetPlayerName(), UIScreenLobby.lobbyReady);
 
-            // Enter lobby on client screen
-            menuHandler.EnterLobby();
+            
 
             // Try to connect to the server
             BoltNetwork.Connect(new UdpEndPoint(UdpIPv4Address.Parse("127.0.0.1"), (ushort)port), ct);
@@ -105,6 +105,9 @@ public class NetworkHandler : Bolt.GlobalEventListener
 
         if (BoltNetwork.isClient)
         {
+            // Enter lobby on client screen
+            menuHandler.EnterLobby();
+
             // Update lobby name for the server player
             UIScreenLobby lobbyScreen = GameObject.Find("LobbyScreen").GetComponent<UIScreenLobby>();
             lobbyScreen.SetLobbyName(true, sct.playerName);

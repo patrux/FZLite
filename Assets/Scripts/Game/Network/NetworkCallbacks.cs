@@ -19,4 +19,31 @@ public class NetworkCallbacks : Bolt.GlobalEventListener
         UIMenuHandler.instance.screenLobby.BeginCountdown();
     }
 
+    public override void SceneLoadRemoteDone(BoltConnection connection)
+    {
+        if (BoltNetwork.isServer)
+        {
+            Vector3 startPosition = new Vector3(Random.Range(-4, 4), 0, Random.Range(-4, 4));
+            BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.Player, startPosition, Quaternion.identity);
+            ConnectToken ct = (ConnectToken)connection.ConnectToken;
+            //be.name = "Player(" + ct.playerName + ")";
+
+            be.AssignControl(connection);
+        }
+    }
+
+    /// <summary>
+    /// Map has loaded for the server player.
+    /// </summary>
+    public override void SceneLoadLocalDone(string map)
+    {
+        if (BoltNetwork.isServer)
+        {
+            Vector3 startPosition = new Vector3(Random.Range(-4, 4), 0, Random.Range(-4, 4));
+            BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.Player, startPosition, Quaternion.identity);
+            //be.name = "Player(" + PlayerSettings.GetPlayerName() + ")";
+
+            be.TakeControl();
+        }
+    }
 }

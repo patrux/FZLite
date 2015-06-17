@@ -1,15 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ClientCallbacks : MonoBehaviour {
+[BoltGlobalBehaviour(BoltNetworkModes.Client)]
+public class ClientCallbacks : Bolt.GlobalEventListener 
+{
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }

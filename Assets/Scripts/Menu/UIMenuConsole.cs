@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class UIMenuConsole : MonoBehaviour 
+public class UIMenuConsole : MonoBehaviour
 {
     static protected UIMenuConsole instance;
     void Awake() { instance = this; }
@@ -21,18 +21,18 @@ public class UIMenuConsole : MonoBehaviour
     float timerFadeDuration = 1f;
     bool fadeText = false;
 
-	void Start()
+    void Start()
     {
         consoleLabel = GetComponent<UILabel>();
         consoleLabel.text = "";
-	}
+    }
 
     float GetDuration(string _text)
     {
         return timerDisplayDurationBase + (_text.Length * timerDisplayDurationPerLetter);
     }
-	
-	void Update()
+
+    void Update()
     {
         if (hasText)
         {
@@ -63,7 +63,7 @@ public class UIMenuConsole : MonoBehaviour
                 }
             }
         }
-	}
+    }
 
     public static void WriteConsole(string _text)
     {

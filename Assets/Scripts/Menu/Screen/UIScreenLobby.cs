@@ -12,11 +12,18 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
     public Color redColor;
     public Color blueColor;
 
+    public static bool lobbyReady = false;
+    public static bool isCountingDown = false;
+
     int countdownIndex = 5;
-    string mapName = "TestMap";
+    public static string mapName = "TestMap";
 
     public void BeginCountdown()
     {
+        if (isCountingDown)
+            return;
+
+        isCountingDown = true;
         countdownIndex = 5;
         uiChatInput.AddLocalMessage("Game beginning in " + countdownIndex + "...");
         InvokeRepeating("LoopCountdown", 1.0f, 1.0f);
@@ -40,7 +47,10 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
         uiChatInput.AddLocalMessage("Loading map [" + mapName + "]");
 
         if (BoltNetwork.isServer)
+        {
             BoltNetwork.LoadScene(mapName);
+            isCountingDown = false;
+        }
     }
 
     /// <summary>
@@ -77,16 +87,16 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
     {
         gameObject.SetActive(true);
 
-        NetworkHandler.gameState = NetworkHandler.GameState.LOBBY;
-        NetworkHandler.lobbyReady = false;
+        UIScreenLobby.gameState = UIScreenLobby.GameState.LOBBY;
+        UIScreenLobby.lobbyReady = false;
 
         SetLobbyName(BoltNetwork.isServer, PlayerSettings.GetPlayerName());
     }
 
     public void Hide()
     {
-        NetworkHandler.gameState = NetworkHandler.GameState.UNCONNECTED;
-        NetworkHandler.lobbyReady = false;
+        UIScreenLobby.gameState = UIScreenLobby.GameState.UNCONNECTED;
+        UIScreenLobby.lobbyReady = false;
 
         labelPlayerRed.text = "";
         labelPlayerBlue.text = "";

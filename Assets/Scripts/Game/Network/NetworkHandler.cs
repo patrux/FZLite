@@ -5,9 +5,12 @@ using UdpKit;
 using Bolt;
 
 // Contains the events for server and client
-public class NetworkHandler : Bolt.GlobalEventListener
+public class UIScreenLobby : Bolt.GlobalEventListener
 {
     UIMenuHandler menuHandler;
+    
+    // The current gamestate of the player
+    public static GameState gameState = GameState.UNCONNECTED;
 
     public enum GameState
     {
@@ -15,11 +18,7 @@ public class NetworkHandler : Bolt.GlobalEventListener
         LOBBY,
         INGAME
     }
-
-    public static GameState gameState = GameState.UNCONNECTED;
-    public static bool lobbyReady = false;
-
-    string map = "Map";
+    
     ushort port = 0;
 
     void Start()

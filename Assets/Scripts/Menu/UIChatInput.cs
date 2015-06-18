@@ -103,7 +103,7 @@ public class UIChatInput : Bolt.GlobalEventListener
         if (textList != null)
         {
             // Check how to handle the input text
-            if (HandleChatCommand.IsAChatCommand(input))
+            if (HandleChatCommand.instance.CheckCommand(input))
             {
                 // The string started with "/" so treat it as a command
                 HandleChatCommand.instance.HandleCommand(input.Substring(1, input.Length - 1));

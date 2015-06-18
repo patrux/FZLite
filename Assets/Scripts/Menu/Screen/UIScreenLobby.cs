@@ -87,7 +87,7 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
     {
         gameObject.SetActive(true);
 
-        NetworkHandler.gameState = NetworkHandler.GameState.LOBBY;
+        GameLogic.instance.gameState = GameLogic.GameState.LOBBY;
         UIScreenLobby.lobbyReady = false;
 
         SetLobbyName(BoltNetwork.isServer, PlayerSettings.GetPlayerName());
@@ -95,7 +95,7 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
 
     public void Hide()
     {
-        NetworkHandler.gameState = NetworkHandler.GameState.UNCONNECTED;
+        GameLogic.instance.gameState = GameLogic.GameState.UNCONNECTED;
         UIScreenLobby.lobbyReady = false;
 
         labelPlayerRed.text = "";

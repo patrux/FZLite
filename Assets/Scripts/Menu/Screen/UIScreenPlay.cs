@@ -14,7 +14,7 @@ public class UIScreenPlay : MonoBehaviour, IMenuScreen
         networkHandler = GameObject.Find("GlobalScripts").GetComponent<NetworkHandler>();
 
         inputIP.value = PlayerSettings.GetIP();
-        inputPort.value = PlayerSettings.GetPort();
+        inputPort.value = "" + PlayerSettings.GetPort();
     }
 
     public void Show()
@@ -22,10 +22,13 @@ public class UIScreenPlay : MonoBehaviour, IMenuScreen
         gameObject.SetActive(true);
     }
 
+    /// <summary>
+    /// Parses string to int, could lead to crashes.
+    /// </summary>
     public void Hide()
     {
         PlayerSettings.SetIP(inputIP.value);
-        PlayerSettings.SetPort(inputPort.value);
+        PlayerSettings.SetPort(int.Parse(inputPort.value));
         PlayerSettings.SaveSettingsToFile();
         gameObject.SetActive(false);
     }

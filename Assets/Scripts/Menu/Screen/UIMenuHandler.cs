@@ -13,6 +13,7 @@ public class UIMenuHandler : MonoBehaviour
     public UIScreenLoadOut screenLoadOut;
     public UIScreenPlay screenPlay;
     public UIScreenLobby screenLobby;
+    public UIScreenServer screenServer;
 
     // Current active screen
     IMenuScreen activeScreen;

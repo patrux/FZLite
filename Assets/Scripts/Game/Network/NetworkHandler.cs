@@ -8,38 +8,30 @@ using Bolt;
 public class NetworkHandler : Bolt.GlobalEventListener
 {
     UIMenuHandler menuHandler;
-    
-    // The current gamestate of the player
-    public static GameState gameState = GameState.UNCONNECTED;
-
-    public enum GameState
-    {
-        UNCONNECTED,
-        LOBBY,
-        INGAME
-    }
-    
-    ushort port = 0;
+    int port;
 
     void Start()
     {
         menuHandler = GameObject.Find("MenuScripts").GetComponent<UIMenuHandler>();
+        port = PlayerSettings.GetPort();
     }
 
+
+    /// <summary>
+    /// Bolt start.
+    /// </summary>
     public override void BoltStartBegin()
     {
-        // Register token classes with Bolt
+        // Register token classes
         BoltNetwork.RegisterTokenClass<ConnectToken>();
         BoltNetwork.RegisterTokenClass<ControlGainedToken>();
     }
 
     /// <summary>
-    /// Create new server and enter lobby.
+    /// Create new server.
     /// </summary>
     public void CreateServer(int _port)
     {
-        PlayerSettings.SetPlayerName(("ptxServer")); // set debug name
-
         port = (ushort)_port;
         BoltLauncher.StartServer(new UdpEndPoint(UdpIPv4Address.Any, (ushort)_port));
 
@@ -70,8 +62,6 @@ public class NetworkHandler : Bolt.GlobalEventListener
         {
             // Store loadout etc here
             ConnectToken ct = new ConnectToken(PlayerSettings.GetPlayerName(), UIScreenLobby.lobbyReady);
-
-            
 
             // Try to connect to the server
             BoltNetwork.Connect(new UdpEndPoint(UdpIPv4Address.Parse("127.0.0.1"), (ushort)port), ct);

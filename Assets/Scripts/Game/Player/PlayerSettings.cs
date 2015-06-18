@@ -5,8 +5,7 @@ using System.Xml.Linq;
 
 public class PlayerSettings : MonoBehaviour
 {
-    static protected PlayerSettings instance;
-
+    static public PlayerSettings instance;
     void Awake() { instance = this; }
     void OnDestroy() { instance = null; }
 
@@ -104,9 +103,9 @@ public class PlayerSettings : MonoBehaviour
     }
 
     /// <summary>
-    /// Loads the settings from the file.
+    /// Reloads (or loads) the latest settings from the file.
     /// </summary>
-    void LoadSettings()
+    public void LoadSettings()
     {
         string path = Application.dataPath + "/StreamingAssets/PlayerSettings.xml";
         XDocument xdoc = XDocument.Load(path);
@@ -220,17 +219,20 @@ public class PlayerSettings : MonoBehaviour
     /// <summary>
     /// Port
     /// </summary>
-    static public void SetPort(string _value)
+    static public void SetPort(int _value)
     {
         if (instance != null)
-            instance.port.SetValue(_value);
+            instance.port.SetValue("" + _value);
     }
 
-    static public string GetPort()
+    /// <summary>
+    /// This may return an error if the port couldn't be parsed.
+    /// </summary>
+    static public int GetPort()
     {
         if (instance != null)
-            return instance.port.GetValue();
+                return int.Parse(instance.port.GetValue());
         else
-            return "NULL";
+            return 0;
     }
 }

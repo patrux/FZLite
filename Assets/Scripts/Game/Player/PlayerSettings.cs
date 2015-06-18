@@ -65,6 +65,9 @@ public class PlayerSettings : MonoBehaviour
     public static KeyCode keyEscape = KeyCode.Escape;
     public static KeyCode keyReloadSettings = KeyCode.F9;
 
+    // Dev hotkeys
+    public static KeyCode devKeyQuickStart = KeyCode.F5;
+
     void Start()
     {
         LoadSettings();

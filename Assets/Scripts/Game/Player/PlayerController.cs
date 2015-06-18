@@ -15,8 +15,6 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         state.Transform.SetTransforms(transform);
         state.SetAnimator(animator);
         state.Animator.applyRootMotion = entity.isOwner;
-
-        state.AddCallback
     }
 
     Vector3 velocity = Vector3.zero;

@@ -3,5 +3,5 @@ using System.Collections;
 
 public static class FZLang 
 {
-    public static string lobby_EmptySlotName = "Empty";
+    public static string lobby_EmptySlotName = "-";
 }

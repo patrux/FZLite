@@ -27,10 +27,8 @@ public class LobbySlot
     public void SetNetPlayer(NetPlayer _netPlayer)
     {
         // Handle ready event
-        if (_netPlayer != null)
-            _netPlayer.OnIsReadyChanged += UpdateSlotColor;
-        else
-            _netPlayer.OnIsReadyChanged -= UpdateSlotColor;
+        if (_netPlayer != null) // We are entering this slot
+            _netPlayer.slotID = GetSlotID();
 
         netPlayer = _netPlayer;
         UpdateSlot();
@@ -49,14 +47,13 @@ public class LobbySlot
     /// <summary>
     /// Update the name and color of this slot.
     /// </summary>
-    void UpdateSlot()
+    public void UpdateSlot()
     {
         if (IsEmpty()) // A player left the slot
             SetLabelText(FZLang.lobby_EmptySlotName);
         else // A player entered the slot
             SetLabelText(netPlayer.playerName);
         
-        if (!BoltNetwork.isServer) // no need to update the color for the server
             UpdateSlotColor();
     }
 
@@ -66,15 +63,10 @@ public class LobbySlot
     /// </summary>
     void UpdateSlotColor()
     {
+        if (!BoltNetwork.isClient) // only the client needs to care about this
+            return;
+
         UIScreenLobby screenLobby = GameObject.Find("LobbyScreen").GetComponent<UIScreenLobby>();
-
-        //GameObject go = GameObject.Find("LobbyScreen");
-        //UIScreenLobby screenLobby;
-
-        //if (go != null)
-        //    screenLobby = go.GetComponent<UIScreenLobby>();
-        //else
-        //    return;
 
         if (IsEmpty())
             label.color = screenLobby.emptyColor;
@@ -91,9 +83,17 @@ public class LobbySlot
             label.text = _text;
     }
 
-    public bool IsTeamRed() { return (slotID <= (GameLogic.instance.MAX_PLAYERS / 2)); }
+    public bool IsTeamRed() { return (slotID < (GameLogic.instance.MAX_PLAYERS / 2)); }
     public bool IsEmpty() { return (netPlayer == null); }
+    public NetPlayer GetNetPlayer() { return netPlayer; }
     public byte GetSlotID() { return slotID; }
     public UILabel GetLabel() { return label; }
-    public string ToString() { return "[LobbySlot] slotID[" + slotID + "] netPlayer[" + netPlayer.ToString() + "]"; }
+
+    public string ToString() 
+    { 
+        if (netPlayer != null)
+            return "[LobbySlot] slotID[" + slotID + "] netPlayer[" + netPlayer.playerName + "]"; 
+        else
+            return "[LobbySlot] slotID[" + slotID + "] netPlayer[null]"; 
+    }
 }

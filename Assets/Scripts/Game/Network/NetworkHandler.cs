@@ -79,59 +79,51 @@ public class NetworkHandler : Bolt.GlobalEventListener
     }
 
     // todo:
-    // track/compare clients by uint playerID instead of name
-    // only send "all other players" to the new player instead of everyone
     // ready up & moving slots
     // leaving in lobby = quits game?
-
-
 
     /// <summary>
     /// Called on server after a client tries to connect.
     /// </summary>
     public override void ConnectRequest(UdpKit.UdpEndPoint _endPoint, IProtocolToken _connectToken)
     {
-        ConnectToken connectToken = (ConnectToken)_connectToken;
-
         if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY)
         {
             if (GameLogic.instance.GetNetPlayerList().Count <= GameLogic.instance.MAX_PLAYERS)
             {
-                // Create and store this NetPlayer
-                NetPlayer netPlayer = NetPlayer.CreateFromConnectToken(connectToken);
+                ConnectToken ct = (ConnectToken)_connectToken;
 
-                // Assign slotID and playerID
-                // Get an available slot and move this player to it
+                // Create and store this NetPlayer
+                NetPlayer netPlayer = NetPlayer.CreateFromConnectToken(ct);
+
+                // Get an available slotID (lobbySlot) and assign it to this player
                 LobbySlot lobbySlot = LobbyHandler.instance.GetFirstAvailableLobbySlot();
                 LobbyHandler.instance.SetLobbySlot(lobbySlot, netPlayer);
 
-                Debug.Log("[Server] Assigned " + lobbySlot.ToString());
-
                 // Update this players slotID create a new ConnectToken
                 netPlayer.slotID = lobbySlot.GetSlotID();
-                ConnectToken ctr = netPlayer.CreateConnectToken();
+                ConnectToken ctr = netPlayer.CreateConnectToken(); // response Token
 
-                // Send this NetPlayer to other NetPlayers
-                netPlayer.CreateNewNetPlayerEvent();
+                Debug.Log("[Server::ConnectRequest] Assigned " + lobbySlot.ToString());
 
-                // Send other NetPlayers to this NetPlayer
-                foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
-                    np.CreateNewNetPlayerEvent();
-
-                // Accept the connection and send back ConnectTokenResponse
                 BoltNetwork.Accept(_endPoint, ctr);
             }
             else
             {
-                WriteLine("A player named [" + connectToken.playerName + "] tried to connect, but the server is full.");
+                WriteLine("A player [" + _endPoint.Address + "] tried to connect, but the server is full.");
                 BoltNetwork.Refuse(_endPoint);
             }
         }
         else
         {
-            WriteLine("A player named [" + connectToken.playerName + "] tried to connect, but the server only accept connections when in lobby.");
+            WriteLine("A player [" + _endPoint.Address + "] tried to connect, but the server only accept connections when in lobby.");
             BoltNetwork.Refuse(_endPoint);
         }
+    }
+
+    public override void Disconnected(BoltConnection connection)
+    {
+        base.Disconnected(connection);
     }
 
     void WriteLine(string _text)

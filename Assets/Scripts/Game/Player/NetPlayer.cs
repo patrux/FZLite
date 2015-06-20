@@ -4,10 +4,6 @@ using Bolt;
 
 public class NetPlayer
 {
-    // NetPlayer Events
-    public delegate void EventHandler();
-    public event EventHandler OnIsReadyChanged;
-
     /// <summary>
     /// Lobby ready status.
     /// </summary>
@@ -28,12 +24,20 @@ public class NetPlayer
     /// <summary>
     /// Set isReady through this method to also trigger the OnIsReadyChanged event.
     /// </summary>
-    public void SetReadyStatus(bool _isReady) { isReady = _isReady; OnIsReadyChanged(); }
+    public void SetReadyStatus(bool _isReady)
+    {
+        isReady = _isReady;
+
+        if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY && BoltNetwork.isClient)
+            LobbyHandler.instance.GetLobbySlotBySlotID(slotID).UpdateSlot();
+    }
 
     /// <summary>
     /// Is NetPlayer on TeamRed.
     /// </summary>
-    public bool IsTeamRed() { return (slotID <= (GameLogic.instance.MAX_PLAYERS / 2)); }
+    public bool IsTeamRed() { return (slotID < (GameLogic.instance.MAX_PLAYERS / 2)); }
+
+    public void SetConnection(BoltConnection _connection) { connection = _connection; playerID = connection.ConnectionId; }
 
     /// <summary>
     /// Creates a NetPlayer with local settings.
@@ -45,6 +49,8 @@ public class NetPlayer
         netPlayer.isReady = false;
         netPlayer.slotID = 0;
         netPlayer.playerID = 0;
+
+        GameLogic.instance.GetNetPlayerList().Add(netPlayer);
         return netPlayer;
     }
 
@@ -81,15 +87,21 @@ public class NetPlayer
 
     #region EventCreation
     /// <summary>
-    /// Sends this NetPlayer to all other connected NetPlayers.
+    /// Sends this NetPlayer to connection.
     /// Note: Server only.
     /// </summary>
-    public void CreateNewNetPlayerEvent()
+    public void CreateNewNetPlayerEvent(ref BoltConnection _connection)
     {
         if (!BoltNetwork.isServer)
             return;
 
-        evNewNetPlayer newNetPlayer = evNewNetPlayer.Create();
+        if (_connection == null)
+        {
+            Debug.Log("CreateNewNetPlayerEvent _connection was null, returning");
+            return;
+        }
+
+        evNewNetPlayer newNetPlayer = evNewNetPlayer.Create(_connection);
         newNetPlayer.playerName = playerName;
         newNetPlayer.isReady = isReady;
         newNetPlayer.slotID = slotID;
@@ -125,7 +137,7 @@ public class NetPlayer
 
         foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
         {
-            if (np.playerName == _netPlayer.playerName)
+            if (np.playerID == _netPlayer.playerID)
             {
                 netPlayerMatch = _netPlayer;
                 break;
@@ -135,5 +147,56 @@ public class NetPlayer
         return (netPlayerMatch != null);
     }
 
-    public string ToString() { return "[NetPlayer] playerName[" + playerName + "] slotID[" + slotID + "] playerID[" + playerID + "]"; }
+    /// <summary>
+    /// Get NetPlayer from slotID.
+    /// Note: Compares slotIDs.
+    /// </summary>
+    public static NetPlayer GetNetPlayer(byte _slotID)
+    {
+        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+        {
+            if (np.slotID == _slotID)
+                return np;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Get NetPlayer from BoltConnection.
+    /// Note: Compares playerIDs.
+    /// </summary>
+    public static NetPlayer GetNetPlayer(BoltConnection _connection)
+    {
+        ConnectToken ct = (ConnectToken)_connection.AcceptToken;
+        uint playerID = ct.playerID;
+        Debug.Log("playerID[" + playerID + "]");
+
+        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+        {
+            if (playerID == np.playerID)
+            {
+                Debug.Log("Match :: [" + playerID + "] == [" + np.playerID + "]");
+                return np;
+            }
+            else
+            {
+                Debug.Log("No Match :: [" + playerID + "] == [" + np.playerID + "]");
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Get NetPlayer from playerID.
+    /// Note: Compares playerIDs.
+    /// </summary>
+    public static NetPlayer GetNetPlayer(uint _playerID)
+    {
+        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+            if (_playerID == np.playerID)
+                return np;
+        return null;
+    }
+
+    public string ToString() { return "playerName[" + playerName + "] slotID[" + slotID + "] playerID[" + playerID + "] connection[" + connection + "]"; }
 }

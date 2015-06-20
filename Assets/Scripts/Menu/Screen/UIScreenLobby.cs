@@ -5,14 +5,14 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
 {
     public UIChatInput uiChatInput;
 
-    // 0 1 2 = red
-    // 3 4 5 = blue
     public UILabel[] labelPlayerSlots;
 
     public Color emptyColor;
     public Color takenColor;
     public Color redColor;
     public Color blueColor;
+
+    public bool teamRed = true;
 
     public void Show()
     {
@@ -33,5 +33,14 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
             BoltLauncher.Shutdown();
 
         gameObject.SetActive(false);
+    }
+
+    public void Button_JoinRedTeam() { teamRed = true; OnJoinTeam(); }
+    public void Button_JoinBlueTeam() { teamRed = false; OnJoinTeam(); }
+
+    // Called when a join team button is pressed
+    public void OnJoinTeam()
+    {
+        LobbyHandler.instance.JoinTeam(teamRed);
     }
 }

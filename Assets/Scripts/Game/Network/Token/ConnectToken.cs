@@ -44,4 +44,9 @@ public class ConnectToken : Bolt.IProtocolToken
         slotID = _packet.ReadByte();
         playerID = _packet.ReadUInt();
     }
+
+    public string ToString()
+    {
+        return "playerName[" + playerName + "] isReady[" + isReady + "] slotID[" + slotID + "] playerID[" + playerID + "]";
+    }
 }

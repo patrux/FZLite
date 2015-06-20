@@ -41,4 +41,31 @@ public class GameLogic : MonoBehaviour
     {
         menuHandler = GameObject.Find("MenuScripts").GetComponent<UIMenuHandler>();
     }
+
+    /// <summary>
+    /// Outputs all the LobbySlots to chat log.
+    /// </summary>
+    public void PrintNetPlayers(UIChatInput _uiChatInput)
+    {
+        _uiChatInput.AddLocalMessage("----- Listing NetPlayers (Count=" + netPlayerList.Count + ") -----");
+        foreach (NetPlayer np in netPlayerList)
+        {
+                _uiChatInput.AddLocalMessage(np.ToString());
+        }
+        _uiChatInput.AddLocalMessage("----- End Listing -----");
+    }
+
+    /// <summary>
+    /// Outputs all the LobbySlots to chat log.
+    /// </summary>
+    public void PrintNetPlayers()
+    {
+        Debug.Log("----- Listing NetPlayers (Count=" + netPlayerList.Count + ") -----");
+        foreach (NetPlayer np in netPlayerList)
+        {
+            Debug.Log(np.ToString());
+        }
+        Debug.Log("----- End Listing -----");
+    }
+
 }

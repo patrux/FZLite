@@ -65,4 +65,14 @@ public class UIMenuHandler : MonoBehaviour
             activeScreen.Show();
         }
     }
+
+    public void EnterServerScreen()
+    {
+        if (activeScreen != null)
+        {
+            activeScreen.Hide();
+            activeScreen = screenServer;
+            activeScreen.Show();
+        }
+    }
 }

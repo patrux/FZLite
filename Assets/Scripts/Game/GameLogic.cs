@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Bolt;
 
 public class GameLogic : MonoBehaviour 
 {
@@ -8,8 +9,15 @@ public class GameLogic : MonoBehaviour
     void Awake() { instance = this; }
     void OnDestroy() { instance = null; }
 
-    // State of the game
+    // Max players can't exceed 10 players, cause of
+    // id assignment which caps at byte size
+    public readonly int MAX_PLAYERS = 6;
+
+    // Current state of the game
     public GameState gameState = GameState.UNCONNECTED;
+
+    // References
+    public UIMenuHandler menuHandler;
 
     public enum GameState
     {
@@ -18,15 +26,19 @@ public class GameLogic : MonoBehaviour
         INGAME
     }
 
-    public List<NetPlayer> playerList = new List<NetPlayer>();
+    // Local NetPlayer
+    public NetPlayer localNetPlayer = null;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    // List of active clients
+    List<NetPlayer> netPlayerList = new List<NetPlayer>();
+
+    /// <summary>
+    /// Returns the list containing all connected NetPlayers.
+    /// </summary>
+    public List<NetPlayer> GetNetPlayerList() { return netPlayerList; }
+
+    void Start()
+    {
+        menuHandler = GameObject.Find("MenuScripts").GetComponent<UIMenuHandler>();
+    }
 }

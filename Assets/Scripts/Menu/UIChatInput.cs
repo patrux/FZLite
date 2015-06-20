@@ -30,14 +30,14 @@ public class UIChatInput : Bolt.GlobalEventListener
     }
 
     /// <summary>
-    /// Clears the chat.
+    /// Clears the chat of any input.
     /// </summary>
-    /// <param name="_fullClear">If true, it will clear chat history aswell.</param>
-    public void ClearChat(bool _fullClear)
+    /// <param name="_clearHistory">If true, it will clear chat history aswell.</param>
+    public void ClearChat(bool _clearHistory)
     {
         textList.Clear();
 
-        if (_fullClear)
+        if (_clearHistory)
         {
             inputHistory.Clear();
             historyIndex = 0;

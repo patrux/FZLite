@@ -4,18 +4,20 @@ using System.Collections.Generic;
 using UdpKit;
 using Bolt;
 
-// Contains the events for server and client
+/// <summary>
+/// Shared callbacks for server and client.
+/// </summary>
 public class NetworkHandler : Bolt.GlobalEventListener
 {
-    UIMenuHandler menuHandler;
+    // Connection settings
+    string ip;
     int port;
 
     void Start()
     {
-        menuHandler = GameObject.Find("MenuScripts").GetComponent<UIMenuHandler>();
+        ip = PlayerSettings.GetIP();
         port = PlayerSettings.GetPort();
     }
-
 
     /// <summary>
     /// Bolt start.
@@ -32,76 +34,103 @@ public class NetworkHandler : Bolt.GlobalEventListener
     /// </summary>
     public void CreateServer(int _port)
     {
-        port = (ushort)_port;
+        port = _port;
         BoltLauncher.StartServer(new UdpEndPoint(UdpIPv4Address.Any, (ushort)_port));
 
         WriteLine("Creating server on port " + _port);
     }
 
     /// <summary>
-    /// Try to connect to server.
+    /// Connect to server.
     /// </summary>
     public void JoinServer(string _ip, int _port)
     {
-        PlayerSettings.SetPlayerName(("ptxClient")); // set debug name
-
-        port = (ushort)_port;
-
+        ip = _ip;
+        port = _port;
         BoltLauncher.StartClient(UdpEndPoint.Any);
 
-        WriteLine("Attempting to join " + _ip + ":" + _port);
+        WriteLine("Connecting to " + _ip + ":" + _port);
     }
 
+    /// <summary>
+    /// Called after trying to join/host a game.
+    /// </summary>
     public override void BoltStartDone()
     {
+        // Reset previous session
+        GameLogic.instance.localNetPlayer = null;
+
         if (BoltNetwork.isServer)
         {
-            menuHandler.EnterLobby();
+            // Load server GUI screen here
+            GameLogic.instance.menuHandler.EnterServerScreen();
         }
-        else if (BoltNetwork.isClient) // CONNECT TO THE SERVER
+        else if (BoltNetwork.isClient)
         {
-            // Store loadout etc here
-            ConnectToken ct = new ConnectToken(PlayerSettings.GetPlayerName(), UIScreenLobby.lobbyReady);
+            // Create a local NetPlayer since this is a client
+            GameLogic.instance.localNetPlayer = NetPlayer.CreateLocalNetPlayer();
 
-            // Try to connect to the server
-            BoltNetwork.Connect(new UdpEndPoint(UdpIPv4Address.Parse("127.0.0.1"), (ushort)port), ct);
+            // Create a connect token for the player
+            ConnectToken ct = GameLogic.instance.localNetPlayer.CreateConnectToken();
+
+            // Try to connect to the server with the token
+            BoltNetwork.Connect(new UdpEndPoint(UdpIPv4Address.Parse(ip), (ushort)port), ct);
         }
     }
+
+    // todo:
+    // track/compare clients by uint playerID instead of name
+    // only send "all other players" to the new player instead of everyone
+    // ready up & moving slots
+    // leaving in lobby = quits game?
+
+
 
     /// <summary>
     /// Called on server after a client tries to connect.
     /// </summary>
-    public override void ConnectRequest(UdpKit.UdpEndPoint _endPoint, IProtocolToken _token)
+    public override void ConnectRequest(UdpKit.UdpEndPoint _endPoint, IProtocolToken _connectToken)
     {
-        ConnectToken cct = (ConnectToken)_token;
+        ConnectToken connectToken = (ConnectToken)_connectToken;
 
-        // Update lobby name for the client
-        UIScreenLobby lobbyScreen = GameObject.Find("LobbyScreen").GetComponent<UIScreenLobby>();
-        lobbyScreen.SetLobbyName(false, cct.playerName);
-
-        // Create a token for listenserver and send to client as a token
-        ConnectToken sct = new ConnectToken(PlayerSettings.GetPlayerName(), UIScreenLobby.lobbyReady);
-
-        BoltNetwork.Accept(_endPoint, sct);
-    }
-
-    /// <summary>
-    /// Called on both client and server after an accepted connection.
-    /// </summary>
-    public override void Connected(BoltConnection connection)
-    {
-        ConnectToken sct = (ConnectToken)connection.AcceptToken;
-        Debug.Log("[Connected] player[" + sct.playerName + "]");
-
-        if (BoltNetwork.isClient)
+        if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY)
         {
-            // Enter lobby on client screen
-            menuHandler.EnterLobby();
+            if (GameLogic.instance.GetNetPlayerList().Count <= GameLogic.instance.MAX_PLAYERS)
+            {
+                // Create and store this NetPlayer
+                NetPlayer netPlayer = NetPlayer.CreateFromConnectToken(connectToken);
 
-            // Update lobby name for the server player
-            UIScreenLobby lobbyScreen = GameObject.Find("LobbyScreen").GetComponent<UIScreenLobby>();
-            lobbyScreen.SetLobbyName(true, sct.playerName);
-            lobbyScreen.SetLobbyReadyStatus(true, sct.readyStatus);
+                // Assign slotID and playerID
+                // Get an available slot and move this player to it
+                LobbySlot lobbySlot = LobbyHandler.instance.GetFirstAvailableLobbySlot();
+                LobbyHandler.instance.SetLobbySlot(lobbySlot, netPlayer);
+
+                Debug.Log("[Server] Assigned " + lobbySlot.ToString());
+
+                // Update this players slotID create a new ConnectToken
+                netPlayer.slotID = lobbySlot.GetSlotID();
+                ConnectToken ctr = netPlayer.CreateConnectToken();
+
+                // Send this NetPlayer to other NetPlayers
+                netPlayer.CreateNewNetPlayerEvent();
+
+                // Send other NetPlayers to this NetPlayer
+                foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+                    np.CreateNewNetPlayerEvent();
+
+                // Accept the connection and send back ConnectTokenResponse
+                BoltNetwork.Accept(_endPoint, ctr);
+            }
+            else
+            {
+                WriteLine("A player named [" + connectToken.playerName + "] tried to connect, but the server is full.");
+                BoltNetwork.Refuse(_endPoint);
+            }
+        }
+        else
+        {
+            WriteLine("A player named [" + connectToken.playerName + "] tried to connect, but the server only accept connections when in lobby.");
+            BoltNetwork.Refuse(_endPoint);
         }
     }
 

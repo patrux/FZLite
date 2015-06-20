@@ -1,36 +1,47 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// ConnectToken stores information about a player from the moment when he connected to the server.
+/// Only contains information about a single player.
+/// </summary>
 public class ConnectToken : Bolt.IProtocolToken
 {
+    // The name of the player
     public string playerName;
-    public bool readyStatus;
-    byte ability0;
-    byte ability1;
 
-    public ConnectToken()
-    { }
-    public ConnectToken(string _playerName, bool _readyStatus)
+    // If the player is ready or not
+    public bool isReady;
+
+    // What "player slot" the player has in the game lobby
+    public byte slotID;
+
+    // Client only, track other clients by their id
+    public uint playerID;
+
+    public ConnectToken(){ }
+
+    public ConnectToken(string _playerName, bool _readyStatus, byte _slotID, uint _playerID)
     {
         playerName = _playerName;
-        readyStatus = _readyStatus;
-        ability0 = 0;
-        ability1 = 1;
+        isReady = _readyStatus;
+        slotID = _slotID;
+        playerID = _playerID;
     }
 
     public void Write(UdpKit.UdpPacket _packet)
     {
         _packet.WriteString(playerName);
-        _packet.WriteBool(readyStatus);
-        _packet.WriteByte(ability0);
-        _packet.WriteByte(ability1);
+        _packet.WriteBool(isReady);
+        _packet.WriteByte(slotID);
+        _packet.WriteUInt(playerID);
     }
 
     public void Read(UdpKit.UdpPacket _packet)
     {
         playerName = _packet.ReadString();
-        readyStatus = _packet.ReadBool();
-        ability0 = _packet.ReadByte();
-        ability1 = _packet.ReadByte();
+        isReady = _packet.ReadBool();
+        slotID = _packet.ReadByte();
+        playerID = _packet.ReadUInt();
     }
 }

@@ -63,6 +63,7 @@ public class NetworkHandler : Bolt.GlobalEventListener
         if (BoltNetwork.isServer)
         {
             // Load server GUI screen here
+            PlayerSettings.SetPlayerName("Server");
             GameLogic.instance.menuHandler.EnterServerScreen();
         }
         else if (BoltNetwork.isClient)
@@ -75,7 +76,6 @@ public class NetworkHandler : Bolt.GlobalEventListener
 
             // Try to connect to the server with the token
             BoltNetwork.Connect(new UdpEndPoint(UdpIPv4Address.Parse(ip), (ushort)port), ct);
-            Debug.Log("[A]");
         }
     }
 
@@ -84,8 +84,6 @@ public class NetworkHandler : Bolt.GlobalEventListener
     /// </summary>
     public override void ConnectRequest(UdpKit.UdpEndPoint _endPoint, IProtocolToken _connectToken)
     {
-        Debug.Log("[B]");
-
         if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY)
         {
             if (GameLogic.instance.GetNetPlayerList().Count <= GameLogic.instance.MAX_PLAYERS)
@@ -122,14 +120,12 @@ public class NetworkHandler : Bolt.GlobalEventListener
 
     public override void Disconnected(BoltConnection connection)
     {
-        Debug.Log("[C]");
-
         NetPlayer np = NetPlayer.GetNetPlayer(connection);
-        Debug.Log("[D]");
 
         if (np == null)
         {
             WriteLine("Disconnected failed to find player.");
+            return;
         }
 
         if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY)
@@ -146,6 +142,7 @@ public class NetworkHandler : Bolt.GlobalEventListener
 
     void WriteLine(string _text)
     {
+        GameLogic.instance.chatHandler.AddLocalMessage(_text);
         UIMenuConsole.WriteConsole(_text);
     }
 }

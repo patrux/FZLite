@@ -5,20 +5,32 @@ using Bolt;
 
 public class GameLogic : MonoBehaviour 
 {
-    static public GameLogic instance;
+    public static GameLogic instance;
     void Awake() { instance = this; }
     void OnDestroy() { instance = null; }
 
-    // Max players can't exceed 10 players, cause of
-    // id assignment which caps at byte size
+    /// <summary>
+    /// Max allowed players.
+    /// </summary>
+    [HideInInspector]
     public readonly int MAX_PLAYERS = 6;
 
-    // Current state of the game
+    /// <summary>
+    /// Current state of the game.
+    /// </summary>
+    [HideInInspector]
     public GameState gameState = GameState.UNCONNECTED;
 
     // References
+    [HideInInspector]
     public UIMenuHandler menuHandler;
 
+    [HideInInspector]
+    public ChatHandler chatHandler;
+
+    /// <summary>
+    /// List of all possible game states.
+    /// </summary>
     public enum GameState
     {
         UNCONNECTED,
@@ -40,19 +52,7 @@ public class GameLogic : MonoBehaviour
     void Start()
     {
         menuHandler = GameObject.Find("MenuScripts").GetComponent<UIMenuHandler>();
-    }
-
-    /// <summary>
-    /// Outputs all the LobbySlots to chat log.
-    /// </summary>
-    public void PrintNetPlayers(UIChatInput _uiChatInput)
-    {
-        _uiChatInput.AddLocalMessage("----- Listing NetPlayers (Count=" + netPlayerList.Count + ") -----");
-        foreach (NetPlayer np in netPlayerList)
-        {
-                _uiChatInput.AddLocalMessage(np.ToString());
-        }
-        _uiChatInput.AddLocalMessage("----- End Listing -----");
+        chatHandler = GameObject.Find("GlobalScripts").GetComponent<ChatHandler>();
     }
 
     /// <summary>
@@ -60,12 +60,11 @@ public class GameLogic : MonoBehaviour
     /// </summary>
     public void PrintNetPlayers()
     {
-        Debug.Log("----- Listing NetPlayers (Count=" + netPlayerList.Count + ") -----");
+        chatHandler.AddLocalMessage("----- Listing NetPlayers (Count=" + netPlayerList.Count + ") -----");
         foreach (NetPlayer np in netPlayerList)
         {
-            Debug.Log(np.ToString());
+            chatHandler.AddLocalMessage(np.ToString());
         }
-        Debug.Log("----- End Listing -----");
+        chatHandler.AddLocalMessage("----- End Listing -----");
     }
-
 }

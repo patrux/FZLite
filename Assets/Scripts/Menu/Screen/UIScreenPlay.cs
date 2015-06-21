@@ -29,7 +29,7 @@ public class UIScreenPlay : MonoBehaviour, IMenuScreen
     {
         PlayerSettings.SetIP(inputIP.value);
         PlayerSettings.SetPort(int.Parse(inputPort.value));
-        PlayerSettings.SaveSettingsToFile();
+        PlayerSettings.SaveSettingsToFile(); // save entered ip and port
         gameObject.SetActive(false);
     }
 

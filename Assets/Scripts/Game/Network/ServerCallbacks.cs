@@ -61,4 +61,9 @@ public class ServerCallbacks : Bolt.GlobalEventListener
         readyUp.playerID = (int)_ev.playerID;
         readyUp.Send();
     }
+
+    public override void OnEvent(evChatMessage _ev)
+    {
+        GameLogic.instance.chatHandler.AddChatMessage(_ev.timeStamp + _ev.senderName + _ev.message);
+    }
 }

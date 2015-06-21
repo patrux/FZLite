@@ -3,7 +3,7 @@ using System.Collections;
 
 public class UIScreenLobby : MonoBehaviour, IMenuScreen
 {
-    public UIChatInput uiChatInput;
+    public ChatHistory uiChatInput;
 
     public UILabel[] labelPlayerSlots;
 
@@ -12,6 +12,10 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
     public Color redColor;
     public Color blueColor;
 
+    /// <summary>
+    /// Stores the button click value.
+    /// </summary>
+    [HideInInspector]
     public bool teamRed = true;
 
     public void Show()
@@ -26,8 +30,6 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
     public void Hide()
     {
         GameLogic.instance.gameState = GameLogic.GameState.UNCONNECTED;
-
-        uiChatInput.ClearChat(true);
 
         if (BoltNetwork.isRunning)
             BoltLauncher.Shutdown();

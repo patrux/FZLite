@@ -92,8 +92,8 @@ public class LobbySlot
     public string ToString() 
     { 
         if (netPlayer != null)
-            return "[LobbySlot] slotID[" + slotID + "] netPlayer[" + netPlayer.playerName + "]"; 
+            return "[LobbySlot] slotID[" + slotID + "] isEmpty[" + IsEmpty() + "] netPlayer[" + netPlayer.playerName + "]"; 
         else
-            return "[LobbySlot] slotID[" + slotID + "] netPlayer[null]"; 
+            return "[LobbySlot] slotID[" + slotID + "] isEmpty[" + IsEmpty() + "] netPlayer[null]"; 
     }
 }

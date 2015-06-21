@@ -185,32 +185,13 @@ public class LobbyHandler : Bolt.GlobalEventListener
     /// <summary>
     /// Outputs all the LobbySlots to chat log.
     /// </summary>
-    public void PrintLobbySlots(UIChatInput _uiChatInput)
-    {
-        _uiChatInput.AddLocalMessage("----- Listing LobbySlots (Length=" + lobbySlots.Length + ") -----");
-        for (int i = 0; i < lobbySlots.Length; i++)
-        {
-            if (!lobbySlots[i].IsEmpty())
-                _uiChatInput.AddLocalMessage("" + lobbySlots[i].ToString() + " isEmpty[" + lobbySlots[i].IsEmpty() + "] netPlayer.SlotID[" + lobbySlots[i].GetNetPlayer().slotID + "]");
-            else
-                _uiChatInput.AddLocalMessage("" + lobbySlots[i].ToString() + " isEmpty[" + lobbySlots[i].IsEmpty() + "]");
-        }
-        _uiChatInput.AddLocalMessage("----- End Listing -----");
-    }
-
-    /// <summary>
-    /// Outputs all the LobbySlots to console.
-    /// </summary>
     public void PrintLobbySlots()
     {
-        Debug.Log("----- Listing LobbySlots (Length=" + lobbySlots.Length + ") -----");
+        GameLogic.instance.chatHandler.AddLocalMessage("----- Listing LobbySlots (Length=" + lobbySlots.Length + ") -----");
         for (int i = 0; i < lobbySlots.Length; i++)
         {
-            if (!lobbySlots[i].IsEmpty())
-                Debug.Log("" + lobbySlots[i].ToString() + " isEmpty[" + lobbySlots[i].IsEmpty() + "] netPlayer.SlotID[" + lobbySlots[i].GetNetPlayer().slotID + "]");
-            else
-                Debug.Log("" + lobbySlots[i].ToString() + " isEmpty[" + lobbySlots[i].IsEmpty() + "]");
+                GameLogic.instance.chatHandler.AddLocalMessage(lobbySlots[i].ToString());
         }
-        Debug.Log("----- End Listing -----");
+        GameLogic.instance.chatHandler.AddLocalMessage("----- End Listing -----");
     }
 }

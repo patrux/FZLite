@@ -9,8 +9,6 @@ public class ClientCallbacks : Bolt.GlobalEventListener
     /// </summary>
     public override void Connected(BoltConnection connection)
     {
-        Debug.Log("[Connected]");
-
         ConnectToken ctr = (ConnectToken)connection.AcceptToken;
 
         // Update info and enter lobby
@@ -20,6 +18,8 @@ public class ClientCallbacks : Bolt.GlobalEventListener
 
         GameLogic.instance.menuHandler.EnterLobby();
         LobbyHandler.instance.SetLobbySlot(localNetPlayer.slotID, localNetPlayer);
+
+        Debug.Log("[Connected] Assigned slotID[" + localNetPlayer.slotID + "] playerID[" + localNetPlayer.playerID + "]");
     }
 
     /// <summary>
@@ -53,5 +53,10 @@ public class ClientCallbacks : Bolt.GlobalEventListener
         // Set ready status of NetPlayer
         NetPlayer netPlayer = NetPlayer.GetNetPlayer((uint)_ev.playerID);
         netPlayer.SetReadyStatus(_ev.readyStatus);
+    }
+
+    public override void OnEvent(evChatMessage _ev)
+    {
+        GameLogic.instance.chatHandler.AddChatMessage(_ev.timeStamp + _ev.senderName + _ev.message);
     }
 }

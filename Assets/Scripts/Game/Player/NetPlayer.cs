@@ -5,21 +5,30 @@ using Bolt;
 public class NetPlayer
 {
     /// <summary>
+    /// Player display name
+    /// </summary>
+    public string playerName;
+
+    /// <summary>
+    /// ID which is used to track the NetPlayer.
+    /// </summary>
+    public uint playerID;
+
+    /// <summary>
+    /// Current game slot
+    /// </summary>
+    public byte slotID;
+    
+    /// <summary>
+    /// The NetPlayers connection with the server.
+    /// Note: Ued by server.
+    /// </summary>
+    public BoltConnection connection = null;
+
+    /// <summary>
     /// Lobby ready status.
     /// </summary>
     public bool isReady;
-
-    // Player name
-    public string playerName;
-
-    // Game slot
-    public byte slotID;
-
-    // Server only
-    public BoltConnection connection = null;
-
-    // Client only
-    public uint playerID;
 
     /// <summary>
     /// Set isReady through this method to also trigger the OnIsReadyChanged event.
@@ -37,6 +46,9 @@ public class NetPlayer
     /// </summary>
     public bool IsTeamRed() { return (slotID < (GameLogic.instance.MAX_PLAYERS / 2)); }
 
+    /// <summary>
+    /// Sets BoltConnection and playerID.
+    /// </summary>
     public void SetConnection(BoltConnection _connection) { connection = _connection; playerID = connection.ConnectionId; }
 
     /// <summary>
@@ -136,10 +148,8 @@ public class NetPlayer
     public static NetPlayer GetNetPlayer(byte _slotID)
     {
         foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
-        {
             if (np.slotID == _slotID)
                 return np;
-        }
         return null;
     }
 
@@ -173,9 +183,7 @@ public class NetPlayer
                 return np;
             }
             else
-            {
                 Debug.Log("[GetNetPlayer::Connection] No Match :: [" + playerID + "] == [" + np.playerID + "]");
-            }
         }
         Debug.Log("[GetNetPlayer::Connection] Return null.");
         return null;

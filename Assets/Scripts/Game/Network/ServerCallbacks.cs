@@ -20,12 +20,12 @@ public class ServerCallbacks : Bolt.GlobalEventListener
         // Send this NetPlayer to other NetPlayers (send to all, excluding self)
         foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
             if (netPlayer.playerID != np.playerID) // if not self
-                netPlayer.CreateNewNetPlayerEvent(ref np.connection);
+                netPlayer.CreateNewNetPlayerEvent(np.connection);
 
         // Send other NetPlayers to this NetPlayer
         foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
             if (netPlayer.playerID != np.playerID) // if not self
-                np.CreateNewNetPlayerEvent(ref netPlayer.connection);
+                np.CreateNewNetPlayerEvent(netPlayer.connection);
     }
 
     public override void OnEvent(evJoinTeam _ev)

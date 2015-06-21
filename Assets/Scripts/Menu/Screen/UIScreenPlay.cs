@@ -35,26 +35,24 @@ public class UIScreenPlay : MonoBehaviour, IMenuScreen
 
     public void OnButton_Host()
     {
+        if (BoltNetwork.isRunning)
+            BoltLauncher.Shutdown();
+
         if (CheckValidPort())
-        {
             networkHandler.CreateServer(int.Parse(inputPort.value));
-        }
         else
-        {
             UIMenuConsole.WriteConsole("Invalid Port.");
-        }
     }
 
     public void OnButton_Join()
     {
+        if (BoltNetwork.isRunning)
+            BoltLauncher.Shutdown();
+
         if (CheckValidIP() && CheckValidPort())
-        {
             networkHandler.JoinServer(inputIP.value, int.Parse(inputPort.value));
-        }
         else
-        {
             UIMenuConsole.WriteConsole("Invalid IP or Port.");
-        }
     }
 
     bool CheckValidIP()

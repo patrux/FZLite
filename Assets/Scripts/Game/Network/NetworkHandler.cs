@@ -75,18 +75,17 @@ public class NetworkHandler : Bolt.GlobalEventListener
 
             // Try to connect to the server with the token
             BoltNetwork.Connect(new UdpEndPoint(UdpIPv4Address.Parse(ip), (ushort)port), ct);
+            Debug.Log("[A]");
         }
     }
-
-    // todo:
-    // ready up & moving slots
-    // leaving in lobby = quits game?
 
     /// <summary>
     /// Called on server after a client tries to connect.
     /// </summary>
     public override void ConnectRequest(UdpKit.UdpEndPoint _endPoint, IProtocolToken _connectToken)
     {
+        Debug.Log("[B]");
+
         if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY)
         {
             if (GameLogic.instance.GetNetPlayerList().Count <= GameLogic.instance.MAX_PLAYERS)
@@ -123,6 +122,25 @@ public class NetworkHandler : Bolt.GlobalEventListener
 
     public override void Disconnected(BoltConnection connection)
     {
+        Debug.Log("[C]");
+
+        NetPlayer np = NetPlayer.GetNetPlayer(connection);
+        Debug.Log("[D]");
+
+        if (np == null)
+        {
+            WriteLine("Disconnected failed to find player.");
+        }
+
+        if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY)
+        {
+            WriteLine("Disconnected[" + np.playerName + "]");
+            GameLogic.instance.GetNetPlayerList().Remove(np);
+        }
+        else if (GameLogic.instance.gameState == GameLogic.GameState.INGAME)
+        {
+        }
+
         base.Disconnected(connection);
     }
 

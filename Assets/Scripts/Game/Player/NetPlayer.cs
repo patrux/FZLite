@@ -90,7 +90,7 @@ public class NetPlayer
     /// Sends this NetPlayer to connection.
     /// Note: Server only.
     /// </summary>
-    public void CreateNewNetPlayerEvent(ref BoltConnection _connection)
+    public void CreateNewNetPlayerEvent(BoltConnection _connection)
     {
         if (!BoltNetwork.isServer)
             return;
@@ -128,6 +128,60 @@ public class NetPlayer
     }
     #endregion
 
+    #region GetNetPlayer
+    /// <summary>
+    /// Get NetPlayer from slotID.
+    /// Note: Compares slotIDs.
+    /// </summary>
+    public static NetPlayer GetNetPlayer(byte _slotID)
+    {
+        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+        {
+            if (np.slotID == _slotID)
+                return np;
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Get NetPlayer from playerID.
+    /// Note: Compares playerIDs.
+    /// </summary>
+    public static NetPlayer GetNetPlayer(uint _playerID)
+    {
+        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+            if (_playerID == np.playerID)
+                return np;
+        return null;
+    }
+
+    /// <summary>
+    /// Get NetPlayer from BoltConnection.
+    /// Note: Compares playerIDs.
+    /// </summary>
+    public static NetPlayer GetNetPlayer(BoltConnection _connection)
+    {
+        ConnectToken ct = (ConnectToken)_connection.AcceptToken;
+        uint playerID = ct.playerID;
+        Debug.Log("[GetNetPlayer::Connection] playerID[" + playerID + "]");
+
+        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+        {
+            if (playerID == np.playerID)
+            {
+                Debug.Log("[GetNetPlayer::Connection] Match :: [" + playerID + "] == [" + np.playerID + "]");
+                return np;
+            }
+            else
+            {
+                Debug.Log("[GetNetPlayer::Connection] No Match :: [" + playerID + "] == [" + np.playerID + "]");
+            }
+        }
+        Debug.Log("[GetNetPlayer::Connection] Return null.");
+        return null;
+    }
+#endregion
+
     /// <summary>
     /// Returns whether the NetPlayer already exists in NetPlayerList.
     /// </summary>
@@ -145,57 +199,6 @@ public class NetPlayer
         }
         Debug.Log("[NewPlayer::Exists] Tried to create: " + _netPlayer.ToString());
         return (netPlayerMatch != null);
-    }
-
-    /// <summary>
-    /// Get NetPlayer from slotID.
-    /// Note: Compares slotIDs.
-    /// </summary>
-    public static NetPlayer GetNetPlayer(byte _slotID)
-    {
-        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
-        {
-            if (np.slotID == _slotID)
-                return np;
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// Get NetPlayer from BoltConnection.
-    /// Note: Compares playerIDs.
-    /// </summary>
-    public static NetPlayer GetNetPlayer(BoltConnection _connection)
-    {
-        ConnectToken ct = (ConnectToken)_connection.AcceptToken;
-        uint playerID = ct.playerID;
-        Debug.Log("playerID[" + playerID + "]");
-
-        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
-        {
-            if (playerID == np.playerID)
-            {
-                Debug.Log("Match :: [" + playerID + "] == [" + np.playerID + "]");
-                return np;
-            }
-            else
-            {
-                Debug.Log("No Match :: [" + playerID + "] == [" + np.playerID + "]");
-            }
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// Get NetPlayer from playerID.
-    /// Note: Compares playerIDs.
-    /// </summary>
-    public static NetPlayer GetNetPlayer(uint _playerID)
-    {
-        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
-            if (_playerID == np.playerID)
-                return np;
-        return null;
     }
 
     public string ToString() { return "playerName[" + playerName + "] slotID[" + slotID + "] playerID[" + playerID + "] connection[" + connection + "]"; }

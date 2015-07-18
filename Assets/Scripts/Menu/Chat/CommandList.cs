@@ -10,12 +10,13 @@ public class CommandList
     {
         // Initialize commands
         commandList.Add(new ChatCommand("help", true, true, Help));
-        commandList.Add(new ChatCommand("reload", true, true, ReloadPlayerSettings));
+        //commandList.Add(new ChatCommand("reload", true, true, ReloadPlayerSettings));
         commandList.Add(new ChatCommand("ping", true, true, CheckPing));
         commandList.Add(new ChatCommand("clients", true, false, CountClients));
         commandList.Add(new ChatCommand("ready", false, true, LobbyReadyUp));
         commandList.Add(new ChatCommand("lobbyslots", true, true, PrintLobbySlots));
         commandList.Add(new ChatCommand("netplayers", true, true, PrintNetPlayers));
+        commandList.Add(new ChatCommand("start", true, false, LoadMap));
     }
 
     /// <summary>
@@ -118,6 +119,12 @@ public class CommandList
             NetPlayer localPlayer = GameLogic.instance.localNetPlayer;
             localPlayer.isReady = localPlayer.isReady ? false : true;
 
+            // Send local message
+            if (localPlayer.isReady)
+                GameLogic.instance.chatHandler.AddLocalMessage("You are ready.");
+            else
+                GameLogic.instance.chatHandler.AddLocalMessage("You are not ready.");
+
             // Create ready up event
             evReadyUp readyUp = evReadyUp.Create(Bolt.GlobalTargets.OnlyServer);
             readyUp.readyStatus = localPlayer.isReady;
@@ -126,6 +133,16 @@ public class CommandList
         }
         else
             WriteLine("You are not in a lobby.");
+    }
+
+    /// <summary>
+    /// Loads the selected map, bypassing ready status.
+    /// </summary>
+    void LoadMap()
+    {
+        string mapName = "TestMap";
+        WriteLine("Loading '" + mapName + "' ...");
+        BoltNetwork.LoadScene(mapName);
     }
 
     /// <summary>

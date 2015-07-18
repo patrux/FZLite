@@ -26,7 +26,7 @@ public class NetworkHandler : Bolt.GlobalEventListener
     {
         // Register token classes
         BoltNetwork.RegisterTokenClass<ConnectToken>();
-        BoltNetwork.RegisterTokenClass<ControlGainedToken>();
+        BoltNetwork.RegisterTokenClass<ControlToken>();
     }
 
     /// <summary>
@@ -120,24 +120,27 @@ public class NetworkHandler : Bolt.GlobalEventListener
 
     public override void Disconnected(BoltConnection connection)
     {
+        if (!BoltNetwork.isServer)
+            return;
+
         NetPlayer np = NetPlayer.GetNetPlayer(connection);
 
         if (np == null)
         {
-            WriteLine("Disconnected failed to find player.");
+            WriteLine("Disconnected, failed to find player.");
             return;
         }
 
         if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY)
         {
             WriteLine("Disconnected[" + np.playerName + "]");
+
             GameLogic.instance.GetNetPlayerList().Remove(np);
+            // Update lobby slots
         }
         else if (GameLogic.instance.gameState == GameLogic.GameState.INGAME)
         {
         }
-
-        base.Disconnected(connection);
     }
 
     void WriteLine(string _text)

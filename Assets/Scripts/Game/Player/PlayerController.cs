@@ -1,96 +1,105 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UdpKit;
+using Bolt;
 
 public class PlayerController : Bolt.EntityEventListener<IPlayerState>
 {
-    Rigidbody rigidBody;
+    // Character animator
     public Animator animator;
+
+    // Character motor
     public PlayerMotor motor;
 
+    // The controlling NetPlayer
+    public NetPlayer controllingPlayer;
+
+    // Keys to track
+    bool moveUp = false;
+    bool moveDown = false;
+    bool moveLeft = false;
+    bool moveRight = false;
+
+    // Rotation
+    float rotationY = 0f;
+
     /// <summary>
-    /// Set up the BoltNetwork State for this entity.
+    /// Set up BoltEntity.
     /// </summary>
     public override void Attached()
     {
         state.Transform.SetTransforms(transform);
         state.SetAnimator(animator);
         state.Animator.applyRootMotion = entity.isOwner;
-    }
 
-    Vector3 velocity = Vector3.zero;
-
-    public float speed = 3f;
-
-    void Start()
-    {
-        rigidBody = GetComponent<Rigidbody>();
-    }
-
-    void Update()
-    {
-        PollKeys(true);
+        //state.AddCallback("CubeColor", ColorChanged); // Whenever the CubeColor value changed, ColorChanged will be called
     }
 
     public override void ControlGained()
     {
         gameObject.name = "Player(" + PlayerSettings.GetPlayerName() + ")";
 
+        ControlToken ct = (ControlToken)entity.controlGainedToken;
+        controllingPlayer = NetPlayer.GetNetPlayer(ct.playerID);
+
+        Debug.Log("controllingPlayer[" + controllingPlayer + "]");
+
         SmartCamera sc = Camera.main.GetComponent<SmartCamera>();
         sc.enabled = true;
         sc.targetName = gameObject.name;
     }
 
-    bool moveUp = false;
-    bool moveDown = false;
-    bool moveLeft = false;
-    bool moveRight = false;
-
-    void PollKeys(bool _mouse)
+    void PollKeys()
     {
         moveUp = Input.GetKey(PlayerSettings.keyMoveUp);
         moveDown = Input.GetKey(PlayerSettings.keyMoveDown);
         moveLeft = Input.GetKey(PlayerSettings.keyMoveLeft);
         moveRight = Input.GetKey(PlayerSettings.keyMoveRight);
-
-        if (_mouse) { } // get mouse info
+        rotationY = GetMouseRotation();
     }
 
     public override void SimulateController()
     {
-        PollKeys(false);
+        PollKeys();
 
         IPlayerCommandInput command = PlayerCommand.Create();
         command.moveUp = moveUp;
         command.moveDown = moveDown;
         command.moveLeft = moveLeft;
         command.moveRight = moveRight;
+        command.rotationY = rotationY;
         entity.QueueInput(command);
     }
 
+    // 
     PlayerMotor.State lastMotorState;
     Vector3 moveInput;
 
     public override void ExecuteCommand(Bolt.Command cmd, bool resetState)
     {
-        //if (entity.isOwner) // hack to only call on controller
-        //    return;
-
-        PlayerCommand pCmd = (PlayerCommand)cmd;
+        PlayerCommand playerCommand = (PlayerCommand)cmd;
 
         if (resetState)
         {
             // we got a correction from the server, reset (this only runs on the client)
-            motor.SetState(pCmd.Result.Position, pCmd.Result.Velocity, true, 0);
+            motor.SetState(playerCommand.Result.Position, playerCommand.Result.Velocity, true, 0);
         }
         else
         {
             // apply movement (this runs on both server and client)
-            PlayerMotor.State motorState = motor.Move(pCmd.Input.moveUp, pCmd.Input.moveDown, pCmd.Input.moveLeft, pCmd.Input.moveRight, false, 0f);
+            PlayerMotor.State motorState = motor.Move(
+                playerCommand.Input.moveUp, 
+                playerCommand.Input.moveDown, 
+                playerCommand.Input.moveLeft, 
+                playerCommand.Input.moveRight, 
+                false, 
+                playerCommand.Input.rotationY); 
+
             lastMotorState = motorState;
 
             // copy the motor state to the commands result (this gets sent back to the client)
-            pCmd.Result.Position = motorState.position;
-            pCmd.Result.Velocity = motorState.velocity;
+            playerCommand.Result.Position = motorState.position;
+            playerCommand.Result.Velocity = motorState.velocity;
 
             // Handle rotation and animation
             moveInput = lastMotorState.input;
@@ -107,12 +116,16 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
 
                 state.isMoving = true;
             }
-            // Look in mouse direction
             else
             {
                 state.isMoving = false;
             }
         }
+    }
+
+    bool IsController()
+    {
+        return (entity.IsController(controllingPlayer.connection));
     }
 
     public override void SimulateOwner()
@@ -131,5 +144,13 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         //{
         //    animator.SetFloat("velocity", 0f);
         //}
+    }
+
+    float GetMouseRotation()
+    {
+        Vector3 objectPos = Camera.main.WorldToScreenPoint(transform.position);
+        Vector3 dir = Input.mousePosition - objectPos;
+        float rotation = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
+        return rotation;
     }
 }

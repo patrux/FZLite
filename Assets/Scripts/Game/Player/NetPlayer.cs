@@ -171,20 +171,11 @@ public class NetPlayer
     /// </summary>
     public static NetPlayer GetNetPlayer(BoltConnection _connection)
     {
-        ConnectToken ct = (ConnectToken)_connection.AcceptToken;
-        uint playerID = ct.playerID;
-        Debug.Log("[GetNetPlayer::Connection] playerID[" + playerID + "]");
+        uint playerID = _connection.ConnectionId;
 
         foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
-        {
             if (playerID == np.playerID)
-            {
-                Debug.Log("[GetNetPlayer::Connection] Match :: [" + playerID + "] == [" + np.playerID + "]");
                 return np;
-            }
-            else
-                Debug.Log("[GetNetPlayer::Connection] No Match :: [" + playerID + "] == [" + np.playerID + "]");
-        }
         Debug.Log("[GetNetPlayer::Connection] Return null.");
         return null;
     }
@@ -205,7 +196,7 @@ public class NetPlayer
                 break;
             }
         }
-        Debug.Log("[NewPlayer::Exists] Tried to create: " + _netPlayer.ToString());
+        Debug.Log("[AlreadyExist::Exists] Tried to create: " + _netPlayer.ToString());
         return (netPlayerMatch != null);
     }
 

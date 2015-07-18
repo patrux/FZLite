@@ -156,5 +156,7 @@ public class ChatHandler : MonoBehaviour
             activeChat.textList.Add(_message);
             activeChat.scrollBar.value = 1f;
         }
+        else
+            Debug.Log("[ChatHandler] Tried to AddChatMessage('" + _message + "') but activeChat is null.");
     }
 }

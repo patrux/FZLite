@@ -114,7 +114,7 @@ public class PlayerMotor : MonoBehaviour
         _state.position = transform.localPosition;
     }
 
-    public State Move(bool forward, bool backward, bool left, bool right, bool jump, float yaw)
+    public State Move(bool forward, bool backward, bool left, bool right, bool jump, float rotation)
     {
         var moving = false;
         var movingDir = Vector3.zero;
@@ -186,7 +186,7 @@ public class PlayerMotor : MonoBehaviour
         Move(_state.velocity);
 
         // set local rotation
-        transform.localRotation = Quaternion.Euler(0, yaw, 0);
+        transform.localRotation = Quaternion.Euler(0f, rotation, 0f);
 
         // detect tunneling
         DetectTunneling();

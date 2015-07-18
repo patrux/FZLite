@@ -26,6 +26,11 @@ public class ServerCallbacks : Bolt.GlobalEventListener
         foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
             if (netPlayer.playerID != np.playerID) // if not self
                 np.CreateNewNetPlayerEvent(netPlayer.connection);
+
+        // Check for dev auto-start
+        if (DevQuickStart.AutoStart())
+            if (GameLogic.instance.GetNetPlayerList().Count >= DevQuickStart.AutoStartCount())
+                BoltNetwork.LoadScene("TestMap");
     }
 
     public override void OnEvent(evJoinTeam _ev)
@@ -60,6 +65,15 @@ public class ServerCallbacks : Bolt.GlobalEventListener
         readyUp.readyStatus = _ev.readyStatus;
         readyUp.playerID = (int)_ev.playerID;
         readyUp.Send();
+
+        // Check if game should start
+        int readyCount = 0;
+        foreach (NetPlayer p in GameLogic.instance.GetNetPlayerList())
+            if (p.isReady)
+                readyCount++;
+
+        if (readyCount == GameLogic.instance.GetNetPlayerList().Count)
+            BoltNetwork.LoadScene("TestMap"); // Everyone is ready, load map
     }
 
     public override void OnEvent(evChatMessage _ev)

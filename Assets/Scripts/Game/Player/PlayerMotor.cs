@@ -6,7 +6,6 @@ using System.Collections.Generic;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMotor : MonoBehaviour
 {
-
     public struct State
     {
         public Vector3 input;
@@ -42,6 +41,10 @@ public class PlayerMotor : MonoBehaviour
 
     [SerializeField]
     LayerMask layerMask;
+
+    // Rotation
+    float rotationSmoothTime; // Gets value from PlayerController
+    float rotationVelocity = 0.0f;
 
     Vector3 sphere
     {
@@ -83,6 +86,8 @@ public class PlayerMotor : MonoBehaviour
         _cc = GetComponent<CharacterController>();
         _state = new State();
         _state.position = transform.localPosition;
+
+        rotationSmoothTime = GetComponent<PlayerController>().rotationSmoothTime;
     }
 
     public void SetState(Vector3 position, Vector3 velocity, bool isGrounded, int jumpFrames)
@@ -186,7 +191,11 @@ public class PlayerMotor : MonoBehaviour
         Move(_state.velocity);
 
         // set local rotation
-        transform.localRotation = Quaternion.Euler(0f, rotation, 0f);
+        if (!moving)
+        {
+            float rot = Mathf.SmoothDampAngle(transform.localRotation.eulerAngles.y, rotation, ref rotationVelocity, rotationSmoothTime);
+            transform.localRotation = Quaternion.Euler(0f, rot, 0f);
+        }
 
         // detect tunneling
         DetectTunneling();

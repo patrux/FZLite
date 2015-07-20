@@ -63,7 +63,7 @@ public class LobbySlot
     /// </summary>
     void UpdateSlotColor()
     {
-        if (!BoltNetwork.isClient) // only the client needs to care about this
+        if (!BoltNetwork.isClient) // skip if not client
             return;
 
         UIScreenLobby screenLobby = GameObject.Find("LobbyScreen").GetComponent<UIScreenLobby>();

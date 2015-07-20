@@ -34,8 +34,6 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         state.Transform.SetTransforms(transform);
         state.SetAnimator(animator);
         state.Animator.applyRootMotion = entity.isOwner;
-
-        //state.AddCallback("CubeColor", ColorChanged); // Whenever the CubeColor value changed, ColorChanged will be called
     }
 
     /// <summary>
@@ -48,7 +46,7 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         ControlToken ct = (ControlToken)entity.controlGainedToken;
         controllingPlayer = NetPlayer.GetNetPlayer(ct.playerID);
 
-        GameObject.Find("Camera Main").GetComponent<SmartCamera>().Initialize(gameObject);
+        GameObject.Find("Main Camera").GetComponent<SmartCamera>().Initialize(gameObject);
 
         Debug.Log("[" + controllingPlayer.ToString() + "] has taken control over " + gameObject.name);
     }

@@ -134,12 +134,14 @@ public class NetworkHandler : Bolt.GlobalEventListener
         if (GameLogic.instance.gameState == GameLogic.GameState.LOBBY)
         {
             WriteLine("Disconnected[" + np.playerName + "]");
-
+            // update lobby slots
             GameLogic.instance.GetNetPlayerList().Remove(np);
-            // Update lobby slots
         }
         else if (GameLogic.instance.gameState == GameLogic.GameState.INGAME)
         {
+            WriteLine("Disconnected[" + np.playerName + "]");
+            // delete player entity gracefully
+            GameLogic.instance.GetNetPlayerList().Remove(np);
         }
     }
 

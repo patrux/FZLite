@@ -21,10 +21,9 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     bool moveRight = false;
 
     // Rotation
+    public float rotationSmoothTime = 0.05f;
     float rotationY = 0f;
-
-    // Client Smoothing
-    float rotationSmoothTime = 0.2f;
+    float rotationVelocity = 0.0f;
 
     /// <summary>
     /// Set up BoltEntity.
@@ -79,10 +78,6 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         entity.QueueInput(command);
     }
 
-    // 
-    PlayerMotor.State lastMotorState;
-    Vector3 moveInput;
-
     /// <summary>
     /// Executes the Controllers command on this BoltEntity.
     /// </summary>
@@ -92,13 +87,13 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     {
         PlayerCommand playerCommand = (PlayerCommand)cmd;
 
-        if (resetState) // we got a correction from the server, reset (this runs on the controller (proxies too?))
+        if (resetState) // Got a correction from server, reset (this runs on the controller (proxies too?))
         {
             motor.SetState(playerCommand.Result.Position, playerCommand.Result.Velocity, true, 0);
         }
         else
         {
-            // apply movement (this runs on both server and client)
+            // Apply movement (this runs on both server and client)
             PlayerMotor.State motorState = motor.Move(
                 playerCommand.Input.moveUp, 
                 playerCommand.Input.moveDown, 
@@ -107,28 +102,17 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
                 false, 
                 playerCommand.Input.rotationY);
 
-            // Store input (remove?)
-            lastMotorState = motorState;
-            moveInput = lastMotorState.input;
-
-            // copy the motor state to the commands result (this gets sent back to the client)
+            // Copy the motor state to the commands result (this gets sent back to the client)
             playerCommand.Result.Position = motorState.position;
             playerCommand.Result.Velocity = motorState.velocity;
 
             // Handle rotation and animation
-            // Rotation
-            if (moveInput.x != 0f || moveInput.z != 0f)
+            if (motorState.input.x != 0f || motorState.input.z != 0f)
             {
-                // Look in move direction
-                Vector3 targetPosition = new Vector3(
-                    transform.position.x + moveInput.x,
-                    transform.position.y,
-                    transform.position.z + moveInput.z);
-
                 // Rotate towards look direction
-                print("LookAt[" + Vector3.Lerp(transform.rotation.eulerAngles, targetPosition, rotationSmoothTime) + "]");
-                //transform.LookAt(Vector3.Lerp(transform.rotation.eulerAngles, targetPosition, rotationSmoothTime));
-                transform.localRotation = Quaternion.Euler(new Vector3(0f, playerCommand.Input.rotationY, 0f));
+                float walkRotation = GetWalkRotation(motorState.input);
+                float rot = Mathf.SmoothDampAngle(transform.localRotation.eulerAngles.y, walkRotation, ref rotationVelocity, rotationSmoothTime);
+                transform.localRotation = Quaternion.Euler(new Vector3(0f, rot, 0f));
 
                 // Set state to moving
                 state.isMoving = true;
@@ -149,5 +133,44 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         Vector3 objectPos = Camera.main.WorldToScreenPoint(transform.position);
         Vector3 dir = Input.mousePosition - objectPos;
         return Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
+    }
+
+    /// <summary>
+    /// Get the rotation of the direction this entity is walking in.
+    /// Note: Remake using Atan2 instead.
+    /// </summary>
+    float GetWalkRotation(Vector3 _moveInput)
+    {
+        float rot = 0f;
+
+        // Z
+        if (_moveInput.z > 0f) // UP
+        {
+            rot = 0f;
+
+            if (_moveInput.x > 0f) // RIGHT
+                rot += 45;
+            else if (_moveInput.x < 0f) // LEFT
+                rot -= 45;
+        }
+        else if (_moveInput.z < 0f) // DOWN
+        {
+            rot = 180f;
+
+            if (_moveInput.x > 0f) // RIGHT
+                rot -= 45;
+            else if (_moveInput.x < 0f) // LEFT
+                rot += 45;
+        }
+        else
+        {
+            // X
+            if (_moveInput.x > 0f) // RIGHT
+                rot = 90f;
+            else if (_moveInput.x < 0f) // LEFT
+                rot = 270f;
+        }
+
+        return rot;
     }
 }

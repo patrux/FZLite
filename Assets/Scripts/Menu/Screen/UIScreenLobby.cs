@@ -27,12 +27,12 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
         LobbyHandler.instance.InitializeLobbySlots();
     }
 
-    public void Hide()
+    public void Hide() // needs logic to determine if we are leaving the lobby or just entering the game
     {
-        GameLogic.instance.gameState = GameLogic.GameState.UNCONNECTED;
+        GameLogic.instance.gameState = GameLogic.GameState.INGAME;
 
-        if (BoltNetwork.isRunning)
-            BoltLauncher.Shutdown();
+        //if (BoltNetwork.isRunning)
+        //    BoltLauncher.Shutdown();
 
         gameObject.SetActive(false);
     }

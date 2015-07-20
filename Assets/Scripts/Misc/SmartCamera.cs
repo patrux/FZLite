@@ -43,7 +43,7 @@ public class SmartCamera : MonoBehaviour
 
     void Update()
     {
-        if (!isInitialized)
+        if (!isInitialized || targetObject == null)
             return;
 
         // Move to player position

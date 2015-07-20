@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class LobbyHandler : Bolt.GlobalEventListener
+public class LobbyHandler : MonoBehaviour
 {
     static public LobbyHandler instance;
     void Awake() { instance = this; }

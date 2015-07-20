@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public interface IMenuScreen 
+public interface IMenuScreen
 {
     void Show();
     void Hide();

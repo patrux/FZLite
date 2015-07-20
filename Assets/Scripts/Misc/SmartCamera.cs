@@ -1,13 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-// Could very easily make the "area" circle shaped instead of rectangle (based on screen)
-// Maybe make two modes
-[RequireComponent(typeof(Camera))]
+// Could very easily make the "area" circle shaped instead of rectangle (based on screen, maybe make two modes)
 public class SmartCamera : MonoBehaviour
 {
-    // Name of the target object to look for
-    public string targetName = "Player";
+    // Initialize before calling update
+    bool isInitialized = false;
 
     // The root/origin gameObject
     private GameObject targetObject;
@@ -31,23 +29,13 @@ public class SmartCamera : MonoBehaviour
     // The scale of the screen in which the mouse will reach distance cap
     Vector3 screenScale;
 
-    void Start()
+    public void Initialize(GameObject _target)
     {
-        Initialize();
-    }
+        targetObject = _target;
 
-    // Initialize before calling update
-    bool isInitialized = false;
-
-    void Initialize()
-    {
-        // Get player
-        targetObject = GameObject.Find(targetName);
-
-        // Initialize by instantly moving to the target position so the camera won't pan due to smoothdamp
+        // Instantly move the camera to the target position
+        // so the camera won't snap-pan due to smoothdamp
         gameObject.transform.position = targetObject.transform.position;
-        //gameObject.transform.parent = targetObject.transform;
-        //gameObject.transform.localScale = Vector3.zero;
 
         UpdateSettings();
         isInitialized = true;

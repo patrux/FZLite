@@ -51,7 +51,7 @@ public class GameLogic : MonoBehaviour
 
     void Start()
     {
-        menuHandler = GameObject.Find("MenuScripts").GetComponent<UIMenuHandler>();
+        menuHandler = GameObject.Find("UIRoot").GetComponent<UIMenuHandler>();
         chatHandler = GameObject.Find("GlobalScripts").GetComponent<ChatHandler>();
     }
 

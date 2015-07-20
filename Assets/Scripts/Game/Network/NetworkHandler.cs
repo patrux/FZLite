@@ -64,7 +64,7 @@ public class NetworkHandler : Bolt.GlobalEventListener
         {
             // Load server GUI screen here
             PlayerSettings.SetPlayerName("Server");
-            GameLogic.instance.menuHandler.EnterServerScreen();
+            GameLogic.instance.menuHandler.SetScreenServer();
         }
         else if (BoltNetwork.isClient)
         {

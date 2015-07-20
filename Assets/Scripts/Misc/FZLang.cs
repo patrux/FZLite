@@ -26,4 +26,6 @@ public static class FZLang
 
     public static string chat_ColorServerName = "[F14266]";
     public static string chat_ColorServerTimestamp = "[F14266]";
+
+    public static string[] GameUI_AbilityBar_keybindNames = new string[] {"M1", "M2", "Spc", "Q", "E", "R", "F"};
 }

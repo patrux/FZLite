@@ -14,6 +14,7 @@ public class UIMenuHandler : MonoBehaviour
     public UIScreenPlay screenPlay;
     public UIScreenLobby screenLobby;
     public UIScreenServer screenServer;
+    public UIScreenGameUI screenGameUI;
 
     // Current active screen
     IMenuScreen activeScreen;
@@ -56,7 +57,7 @@ public class UIMenuHandler : MonoBehaviour
         }
     }
 
-    public void EnterLobby()
+    public void SetScreenLobby()
     {
         if (activeScreen != null)
         {
@@ -66,12 +67,22 @@ public class UIMenuHandler : MonoBehaviour
         }
     }
 
-    public void EnterServerScreen()
+    public void SetScreenServer()
     {
         if (activeScreen != null)
         {
             activeScreen.Hide();
             activeScreen = screenServer;
+            activeScreen.Show();
+        }
+    }
+
+    public void SetScreenGameUI()
+    {
+        if (activeScreen != null)
+        {
+            activeScreen.Hide();
+            activeScreen = screenGameUI;
             activeScreen.Show();
         }
     }

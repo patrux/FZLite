@@ -21,7 +21,7 @@ public class NetPlayer
     
     /// <summary>
     /// The NetPlayers connection with the server.
-    /// Note: Ued by server.
+    /// Note: Used by server.
     /// </summary>
     public BoltConnection connection = null;
 

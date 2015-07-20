@@ -23,6 +23,9 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     // Rotation
     float rotationY = 0f;
 
+    // Client Smoothing
+    float rotationSmoothTime = 0.2f;
+
     /// <summary>
     /// Set up BoltEntity.
     /// </summary>
@@ -35,6 +38,9 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         //state.AddCallback("CubeColor", ColorChanged); // Whenever the CubeColor value changed, ColorChanged will be called
     }
 
+    /// <summary>
+    /// Called when a NetPlayer takes control of this BoltEntity.
+    /// </summary>
     public override void ControlGained()
     {
         gameObject.name = "Player(" + PlayerSettings.GetPlayerName() + ")";
@@ -42,13 +48,14 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         ControlToken ct = (ControlToken)entity.controlGainedToken;
         controllingPlayer = NetPlayer.GetNetPlayer(ct.playerID);
 
-        Debug.Log("controllingPlayer[" + controllingPlayer + "]");
+        GameObject.Find("Camera Main").GetComponent<SmartCamera>().Initialize(gameObject);
 
-        SmartCamera sc = Camera.main.GetComponent<SmartCamera>();
-        sc.enabled = true;
-        sc.targetName = gameObject.name;
+        Debug.Log("[" + controllingPlayer.ToString() + "] has taken control over " + gameObject.name);
     }
 
+    /// <summary>
+    /// Save player keypresses
+    /// </summary>
     void PollKeys()
     {
         moveUp = Input.GetKey(PlayerSettings.keyMoveUp);
@@ -58,6 +65,9 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         rotationY = GetMouseRotation();
     }
 
+    /// <summary>
+    /// Create a command from the player input and send it.
+    /// </summary>
     public override void SimulateController()
     {
         PollKeys();
@@ -75,13 +85,17 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     PlayerMotor.State lastMotorState;
     Vector3 moveInput;
 
+    /// <summary>
+    /// Executes the Controllers command on this BoltEntity.
+    /// </summary>
+    /// <param name="cmd">The PlayerCommand to execute on this BoltEntity.</param>
+    /// <param name="resetState"></param>
     public override void ExecuteCommand(Bolt.Command cmd, bool resetState)
     {
         PlayerCommand playerCommand = (PlayerCommand)cmd;
 
-        if (resetState)
+        if (resetState) // we got a correction from the server, reset (this runs on the controller (proxies too?))
         {
-            // we got a correction from the server, reset (this only runs on the client)
             motor.SetState(playerCommand.Result.Position, playerCommand.Result.Velocity, true, 0);
         }
         else
@@ -93,64 +107,49 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
                 playerCommand.Input.moveLeft, 
                 playerCommand.Input.moveRight, 
                 false, 
-                playerCommand.Input.rotationY); 
+                playerCommand.Input.rotationY);
 
+            // Store input (remove?)
             lastMotorState = motorState;
+            moveInput = lastMotorState.input;
 
             // copy the motor state to the commands result (this gets sent back to the client)
             playerCommand.Result.Position = motorState.position;
             playerCommand.Result.Velocity = motorState.velocity;
 
             // Handle rotation and animation
-            moveInput = lastMotorState.input;
-
-            // Look in walk direction
+            // Rotation
             if (moveInput.x != 0f || moveInput.z != 0f)
             {
+                // Look in move direction
                 Vector3 targetPosition = new Vector3(
                     transform.position.x + moveInput.x,
                     transform.position.y,
                     transform.position.z + moveInput.z);
 
-                transform.LookAt(targetPosition);
+                // Rotate towards look direction
+                print("LookAt[" + Vector3.Lerp(transform.rotation.eulerAngles, targetPosition, rotationSmoothTime) + "]");
+                //transform.LookAt(Vector3.Lerp(transform.rotation.eulerAngles, targetPosition, rotationSmoothTime));
+                transform.localRotation = Quaternion.Euler(new Vector3(0f, playerCommand.Input.rotationY, 0f));
 
+                // Set state to moving
                 state.isMoving = true;
             }
             else
             {
+                // Set state to not moving
                 state.isMoving = false;
             }
         }
     }
 
-    bool IsController()
-    {
-        return (entity.IsController(controllingPlayer.connection));
-    }
-
-    public override void SimulateOwner()
-    {
-        //Vector3 moveInput = Vector3.zero;
-        //moveInput.x = Input.GetAxis("Horizontal");
-        //moveInput.z = Input.GetAxis("Vertical");
-
-        //if (moveInput != Vector3.zero)
-        //{
-        //    animator.SetFloat("velocity", Mathf.Max(Mathf.Abs(moveInput.x), Mathf.Abs(moveInput.z)));
-        //    transform.position = transform.position + (moveInput.normalized * speed * BoltNetwork.frameDeltaTime);
-        //    transform.localRotation = Quaternion.LookRotation(moveInput.normalized);
-        //}
-        //else
-        //{
-        //    animator.SetFloat("velocity", 0f);
-        //}
-    }
-
+    /// <summary>
+    /// Returns the top-down rotation of this game object.
+    /// </summary>
     float GetMouseRotation()
     {
         Vector3 objectPos = Camera.main.WorldToScreenPoint(transform.position);
         Vector3 dir = Input.mousePosition - objectPos;
-        float rotation = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
-        return rotation;
+        return Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
     }
 }

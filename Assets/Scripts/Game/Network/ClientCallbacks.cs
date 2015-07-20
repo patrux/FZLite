@@ -16,7 +16,7 @@ public class ClientCallbacks : Bolt.GlobalEventListener
         localNetPlayer.slotID = ctr.slotID;
         localNetPlayer.SetConnection(connection);
 
-        GameLogic.instance.menuHandler.EnterLobby();
+        GameLogic.instance.menuHandler.SetScreenLobby();
         LobbyHandler.instance.SetLobbySlot(localNetPlayer.slotID, localNetPlayer);
 
         Debug.Log("[Connected] Assigned slotID[" + localNetPlayer.slotID + "] playerID[" + localNetPlayer.playerID + "]");

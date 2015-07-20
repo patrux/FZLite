@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class KeypressHighlight : MonoBehaviour 
+public class KeypressHighlight : MonoBehaviour
 {
     public UILabel label;
 
-    // Keys
-    public string key;
+    // Key
     KeyCode keyCode;
 
     // Colors
@@ -17,14 +16,20 @@ public class KeypressHighlight : MonoBehaviour
     public float maxColorTime;
     float keyDownTime = 0f;
 
-	void Start () 
+    bool isInitialized = false;
+
+    public void Initialize(string _key)
     {
         originalColor = label.color;
-        keyCode = (KeyCode)System.Enum.Parse(typeof(KeyCode), key);
-	}
-	
-	void Update () 
+        keyCode = (KeyCode)System.Enum.Parse(typeof(KeyCode), _key);
+        isInitialized = true;
+    }
+
+    void Update()
     {
+        if (!isInitialized)
+            return;
+
         if (Input.GetKeyDown(keyCode))
         {
             keyDownTime = Time.time;
@@ -42,5 +47,5 @@ public class KeypressHighlight : MonoBehaviour
         {
             label.color = originalColor;
         }
-	}
+    }
 }

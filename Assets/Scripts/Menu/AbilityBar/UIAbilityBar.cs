@@ -70,7 +70,7 @@ public class UIAbilityBar : MonoBehaviour
                 break;
         }
 
-        ability.kpHighlight.key = keybind;
+        ability.kpHighlight.Initialize(keybind);
 
         // Set tooltip
         //ability.tooltip.stringID = 0;

@@ -25,6 +25,9 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     float rotationY = 0f;
     float rotationVelocity = 0.0f;
 
+    // Logic
+    float characterBaseHeight = 1f; // height to spawn stuff at
+
     /// <summary>
     /// Set up BoltEntity.
     /// </summary>
@@ -51,15 +54,11 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     }
 
     /// <summary>
-    /// Save player keypresses
+    /// Simulates server logic for this entity.
     /// </summary>
-    void PollKeys()
+    public override void SimulateOwner()
     {
-        moveUp = Input.GetKey(PlayerSettings.keyMoveUp);
-        moveDown = Input.GetKey(PlayerSettings.keyMoveDown);
-        moveLeft = Input.GetKey(PlayerSettings.keyMoveLeft);
-        moveRight = Input.GetKey(PlayerSettings.keyMoveRight);
-        rotationY = GetMouseRotation();
+        
     }
 
     /// <summary>
@@ -68,6 +67,7 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     public override void SimulateController()
     {
         PollKeys();
+        CheckAbilityUse();
 
         IPlayerCommandInput command = PlayerCommand.Create();
         command.moveUp = moveUp;
@@ -76,6 +76,52 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         command.moveRight = moveRight;
         command.rotationY = rotationY;
         entity.QueueInput(command);
+    }
+
+
+    void CheckAbilityUse()
+    {
+        if (Input.GetKeyDown(PlayerSettings.keyAttack1))
+        {
+            // Create event wich will be sent to the server
+            evUseAbility useAbility = evUseAbility.Create(entity);
+
+            // The ability slot used
+            useAbility.AbilitySlotID = 0;
+
+            // Mouse position at time of use
+            Vector3 mousePos = new Vector3(Input.mousePosition.x, GetMainCamera().transform.position.y, Input.mousePosition.z);
+            Vector3 mouseWorld = GetMainCamera().ScreenToWorldPoint(mousePos);
+
+            // Get direction
+            Vector3 direction = (mouseWorld - transform.position);
+            direction.y = 0f;
+
+            if (direction != Vector3.zero)
+                direction.Normalize();
+
+            Debug.Log("[FB::Client] direction[" + FZTools.WriteVector(direction) + "] mouseWorld[" + FZTools.WriteVector(mouseWorld) + "] position[" + FZTools.WriteVector(transform.position) + "]");
+
+            useAbility.DirectionX = direction.x;
+            useAbility.DirectionY = direction.z;
+
+            useAbility.Send();
+        }
+    }
+
+    public override void OnEvent(evUseAbility evnt)
+    {
+        if (BoltNetwork.isServer)
+        {
+            Vector3 origin = new Vector3(transform.position.x, characterBaseHeight, transform.position.z);
+            BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.FireBall, new Vector3(0f, 10000f, 0f), Quaternion.identity);
+
+            be.TakeControl();
+            be.gameObject.name = "Fireball(" + NetPlayer.GetNetPlayer(evnt.RaisedBy.ConnectionId).playerName + ")";
+            be.GetComponent<FireballTest>().Initialize(origin, new Vector3(evnt.DirectionX, 0f, evnt.DirectionY));
+
+            //Debug.DrawLine(origin, new Vector3(evnt.DirectionX, characterBaseHeight, evnt.DirectionY), Color.red);
+        }
     }
 
     /// <summary>
@@ -95,11 +141,11 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         {
             // Apply movement (this runs on both server and client)
             PlayerMotor.State motorState = motor.Move(
-                playerCommand.Input.moveUp, 
-                playerCommand.Input.moveDown, 
-                playerCommand.Input.moveLeft, 
-                playerCommand.Input.moveRight, 
-                false, 
+                playerCommand.Input.moveUp,
+                playerCommand.Input.moveDown,
+                playerCommand.Input.moveLeft,
+                playerCommand.Input.moveRight,
+                false,
                 playerCommand.Input.rotationY);
 
             // Copy the motor state to the commands result (this gets sent back to the client)
@@ -123,6 +169,18 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
                 state.isMoving = false;
             }
         }
+    }
+
+    /// <summary>
+    /// Save player keypresses
+    /// </summary>
+    void PollKeys()
+    {
+        moveUp = Input.GetKey(PlayerSettings.keyMoveUp);
+        moveDown = Input.GetKey(PlayerSettings.keyMoveDown);
+        moveLeft = Input.GetKey(PlayerSettings.keyMoveLeft);
+        moveRight = Input.GetKey(PlayerSettings.keyMoveRight);
+        rotationY = GetMouseRotation();
     }
 
     /// <summary>
@@ -172,5 +230,10 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         }
 
         return rot;
+    }
+
+    Camera GetMainCamera()
+    {
+        return GameObject.Find("Main Camera").GetComponent<Camera>();
     }
 }

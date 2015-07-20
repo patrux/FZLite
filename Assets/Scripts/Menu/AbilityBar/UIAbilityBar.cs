@@ -86,6 +86,10 @@ public class UIAbilityBar : MonoBehaviour
 
         SetAnchor(prevAbility, ability);
 
+        // Set collider
+        ability.collider.size = new Vector3(ability.spriteBorder.width, ability.spriteBorder.width, 1f);
+        ability.collider.center = ability.spriteBorder.gameObject.transform.localPosition;
+
         return ability;
     }
 
@@ -113,13 +117,7 @@ public class UIAbilityBar : MonoBehaviour
             _source.spriteBorder.topAnchor.Set(_target.spriteBorder.transform, 1f, 0f);
         }
 
-        _source.spriteBorder.UpdateAnchors();
-
-        // Update BoxCollider to match the new anchor
-        _source.collider.center = new Vector3(
-            _source.spriteBorder.gameObject.transform.localPosition.x,
-            _source.spriteBorder.gameObject.transform.localPosition.y,
-            _source.spriteBorder.gameObject.transform.localPosition.z);
+        _source.spriteBorder.ResetAndUpdateAnchors();
     }
 
     /// <summary>

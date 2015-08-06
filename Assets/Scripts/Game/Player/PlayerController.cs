@@ -53,6 +53,13 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         Debug.Log("[" + controllingPlayer.ToString() + "] has taken control over " + gameObject.name);
     }
 
+    public override void ControlLost()
+    {
+        ControlToken ct = (ControlToken)entity.controlGainedToken;
+        controllingPlayer = NetPlayer.GetNetPlayer(ct.playerID);
+        gameObject.name = "Player(" + controllingPlayer.playerName + ")";
+    }
+
     /// <summary>
     /// Simulates server logic for this entity.
     /// </summary>
@@ -67,19 +74,27 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     public override void SimulateController()
     {
         PollKeys();
-        CheckAbilityUse();
+        //CheckAbilityUse();
 
         IPlayerCommandInput command = PlayerCommand.Create();
+        // Movement input
         command.moveUp = moveUp;
         command.moveDown = moveDown;
         command.moveLeft = moveLeft;
         command.moveRight = moveRight;
+
+        // Mouse rotation
         command.rotationY = rotationY;
+
+        // Ability usage
+        command.fireAbility0 = Input.GetMouseButtonDown(0);
+        command.fireAbility1 = Input.GetMouseButtonDown(1);
+
         entity.QueueInput(command);
     }
 
-
-    void CheckAbilityUse()
+    // http://doc.photonengine.com/en/bolt/current/advanced-tutorials/chapter-5
+    void UseAbility(PlayerCommand _cmd)
     {
         if (Input.GetKeyDown(PlayerSettings.keyAttack1))
         {
@@ -89,22 +104,12 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
             // The ability slot used
             useAbility.AbilitySlotID = 0;
 
-            // Mouse position at time of use
-            Vector3 mousePos = new Vector3(Input.mousePosition.x, GetMainCamera().transform.position.y, Input.mousePosition.z);
-            Vector3 mouseWorld = GetMainCamera().ScreenToWorldPoint(mousePos);
+            // Get rotation
+            Vector3 objectScreenPos = Camera.main.WorldToScreenPoint(transform.position);
+            Vector3 dir = Input.mousePosition - objectScreenPos;
+            float rotation = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
 
-            // Get direction
-            Vector3 direction = (mouseWorld - transform.position);
-            direction.y = 0f;
-
-            if (direction != Vector3.zero)
-                direction.Normalize();
-
-            Debug.Log("[FB::Client] direction[" + FZTools.WriteVector(direction) + "] mouseWorld[" + FZTools.WriteVector(mouseWorld) + "] position[" + FZTools.WriteVector(transform.position) + "]");
-
-            useAbility.DirectionX = direction.x;
-            useAbility.DirectionY = direction.z;
-
+            useAbility.Rotation = rotation;
             useAbility.Send();
         }
     }
@@ -114,13 +119,12 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         if (BoltNetwork.isServer)
         {
             Vector3 origin = new Vector3(transform.position.x, characterBaseHeight, transform.position.z);
-            BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.FireBall, new Vector3(0f, 10000f, 0f), Quaternion.identity);
+            InstantiateToken iToken = new InstantiateToken(NetPlayer.GetNetPlayer(evnt).playerID, origin);
+            BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.FireBall, iToken, origin, Quaternion.identity);
+            be.gameObject.name = "Fireball(" + NetPlayer.GetNetPlayer(evnt).playerName + ")";
+            be.GetComponent<FireballTest>().Initialize(origin, evnt.Rotation);
 
-            be.TakeControl();
-            be.gameObject.name = "Fireball(" + NetPlayer.GetNetPlayer(evnt.RaisedBy.ConnectionId).playerName + ")";
-            be.GetComponent<FireballTest>().Initialize(origin, new Vector3(evnt.DirectionX, 0f, evnt.DirectionY));
-
-            //Debug.DrawLine(origin, new Vector3(evnt.DirectionX, characterBaseHeight, evnt.DirectionY), Color.red);
+            //be.TakeControl();
         }
     }
 
@@ -131,34 +135,34 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     /// <param name="resetState"></param>
     public override void ExecuteCommand(Bolt.Command cmd, bool resetState)
     {
-        PlayerCommand playerCommand = (PlayerCommand)cmd;
+        PlayerCommand pCmd = (PlayerCommand)cmd;
 
         if (resetState) // Got a correction from server, reset (this runs on the controller (proxies too?))
         {
-            motor.SetState(playerCommand.Result.Position, playerCommand.Result.Velocity, true, 0);
+            motor.SetState(pCmd.Result.Position, pCmd.Result.Velocity, true, 0);
         }
         else
         {
             // Apply movement (this runs on both server and client)
             PlayerMotor.State motorState = motor.Move(
-                playerCommand.Input.moveUp,
-                playerCommand.Input.moveDown,
-                playerCommand.Input.moveLeft,
-                playerCommand.Input.moveRight,
+                pCmd.Input.moveUp,
+                pCmd.Input.moveDown,
+                pCmd.Input.moveLeft,
+                pCmd.Input.moveRight,
                 false,
-                playerCommand.Input.rotationY);
+                pCmd.Input.rotationY);
 
             // Copy the motor state to the commands result (this gets sent back to the client)
-            playerCommand.Result.Position = motorState.position;
-            playerCommand.Result.Velocity = motorState.velocity;
+            pCmd.Result.Position = motorState.position;
+            pCmd.Result.Velocity = motorState.velocity;
 
             // Handle rotation and animation
             if (motorState.input.x != 0f || motorState.input.z != 0f)
             {
                 // Rotate towards look direction
                 float walkRotation = GetWalkRotation(motorState.input);
-                float rot = Mathf.SmoothDampAngle(transform.localRotation.eulerAngles.y, walkRotation, ref rotationVelocity, rotationSmoothTime);
-                transform.localRotation = Quaternion.Euler(new Vector3(0f, rot, 0f));
+                float rotation = Mathf.SmoothDampAngle(transform.localRotation.eulerAngles.y, walkRotation, ref rotationVelocity, rotationSmoothTime);
+                FZTools.SetRotation(transform, rotation);
 
                 // Set state to moving
                 state.isMoving = true;
@@ -167,6 +171,16 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
             {
                 // Set state to not moving
                 state.isMoving = false;
+            }
+
+            if (pCmd.IsFirstExecution)
+            {
+                if (pCmd.Input.fireAbility0)
+                {
+                    BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.FireBall, transform.position, Quaternion.identity);
+                    be.gameObject.name = "Fireball(" + controllingPlayer.playerName + ")";
+                    be.GetComponent<FireballTest>().Initialize(transform.position, pCmd.Input.rotationY);
+                }
             }
         }
     }

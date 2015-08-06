@@ -143,7 +143,6 @@ public class NetPlayer
     #region GetNetPlayer
     /// <summary>
     /// Get NetPlayer from slotID.
-    /// Note: Compares slotIDs.
     /// </summary>
     public static NetPlayer GetNetPlayer(byte _slotID)
     {
@@ -155,7 +154,6 @@ public class NetPlayer
 
     /// <summary>
     /// Get NetPlayer from playerID.
-    /// Note: Compares playerIDs.
     /// </summary>
     public static NetPlayer GetNetPlayer(uint _playerID)
     {
@@ -167,7 +165,6 @@ public class NetPlayer
 
     /// <summary>
     /// Get NetPlayer from BoltConnection.
-    /// Note: Compares playerIDs.
     /// </summary>
     public static NetPlayer GetNetPlayer(BoltConnection _connection)
     {
@@ -176,7 +173,20 @@ public class NetPlayer
         foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
             if (playerID == np.playerID)
                 return np;
-        Debug.Log("[GetNetPlayer::Connection] Return null.");
+        return null;
+    }
+
+    /// <summary>
+    /// Get NetPlayer from a Bolt Event.
+    /// </summary>
+    public static NetPlayer GetNetPlayer(Bolt.Event _boltEvent)
+    {
+
+        uint playerID = _boltEvent.RaisedBy.ConnectionId;
+
+        foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+            if (playerID == np.playerID)
+                return np;
         return null;
     }
 #endregion

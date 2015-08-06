@@ -17,6 +17,7 @@ public class CommandList
         commandList.Add(new ChatCommand("lobbyslots", true, true, PrintLobbySlots));
         commandList.Add(new ChatCommand("netplayers", true, true, PrintNetPlayers));
         commandList.Add(new ChatCommand("start", true, false, LoadMap));
+        commandList.Add(new ChatCommand("7", true, false, LoadMap));
     }
 
     /// <summary>

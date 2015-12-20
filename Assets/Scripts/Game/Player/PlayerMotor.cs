@@ -124,6 +124,7 @@ public class PlayerMotor : MonoBehaviour
         var moving = false;
         var movingDir = Vector3.zero;
 
+        // Direction
         if (forward ^ backward)
         {
             movingDir.z = forward ? +1 : -1;
@@ -139,11 +140,10 @@ public class PlayerMotor : MonoBehaviour
         if (movingDir.x != 0 || movingDir.z != 0)
         {
             moving = true;
-            //movingDir = Vector3.Normalize(Quaternion.Euler(0, yaw, 0) * movingDir);
             movingDir = Vector3.Normalize(movingDir);
         }
 
-        //
+        // Falling
         if (_state.isGrounded)
         {
             if (jump && _state.jumpFrames == 0)

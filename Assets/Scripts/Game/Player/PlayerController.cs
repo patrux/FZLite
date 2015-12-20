@@ -26,7 +26,7 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     float rotationVelocity = 0.0f;
 
     // Logic
-    float characterBaseHeight = 1f; // height to spawn stuff at
+    float characterBaseHeight = 0.5f; // height to spawn stuff at
 
     /// <summary>
     /// Set up BoltEntity.
@@ -36,6 +36,15 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         state.Transform.SetTransforms(transform);
         state.SetAnimator(animator);
         state.Animator.applyRootMotion = entity.isOwner;
+
+        state.AddCallback("UsedAbility", UsedAbilityAux);
+    }
+
+    float lastRot = 0f;
+
+    void UsedAbilityAux()
+    {
+        UseAbility(0, 0f);
     }
 
     /// <summary>
@@ -65,7 +74,7 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     /// </summary>
     public override void SimulateOwner()
     {
-        
+
     }
 
     /// <summary>
@@ -93,41 +102,6 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
         entity.QueueInput(command);
     }
 
-    // http://doc.photonengine.com/en/bolt/current/advanced-tutorials/chapter-5
-    void UseAbility(PlayerCommand _cmd)
-    {
-        if (Input.GetKeyDown(PlayerSettings.keyAttack1))
-        {
-            // Create event wich will be sent to the server
-            evUseAbility useAbility = evUseAbility.Create(entity);
-
-            // The ability slot used
-            useAbility.AbilitySlotID = 0;
-
-            // Get rotation
-            Vector3 objectScreenPos = Camera.main.WorldToScreenPoint(transform.position);
-            Vector3 dir = Input.mousePosition - objectScreenPos;
-            float rotation = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg;
-
-            useAbility.Rotation = rotation;
-            useAbility.Send();
-        }
-    }
-
-    public override void OnEvent(evUseAbility evnt)
-    {
-        if (BoltNetwork.isServer)
-        {
-            Vector3 origin = new Vector3(transform.position.x, characterBaseHeight, transform.position.z);
-            InstantiateToken iToken = new InstantiateToken(NetPlayer.GetNetPlayer(evnt).playerID, origin);
-            BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.FireBall, iToken, origin, Quaternion.identity);
-            be.gameObject.name = "Fireball(" + NetPlayer.GetNetPlayer(evnt).playerName + ")";
-            be.GetComponent<FireballTest>().Initialize(origin, evnt.Rotation);
-
-            //be.TakeControl();
-        }
-    }
-
     /// <summary>
     /// Executes the Controllers command on this BoltEntity.
     /// </summary>
@@ -136,8 +110,8 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
     public override void ExecuteCommand(Bolt.Command cmd, bool resetState)
     {
         PlayerCommand pCmd = (PlayerCommand)cmd;
-
-        if (resetState) // Got a correction from server, reset (this runs on the controller (proxies too?))
+        lastRot = pCmd.Input.rotationY;
+        if (resetState) // Got a correction from server, reset (this runs on the controller)
         {
             motor.SetState(pCmd.Result.Position, pCmd.Result.Velocity, true, 0);
         }
@@ -172,16 +146,34 @@ public class PlayerController : Bolt.EntityEventListener<IPlayerState>
                 // Set state to not moving
                 state.isMoving = false;
             }
+        }
 
-            if (pCmd.IsFirstExecution)
-            {
-                if (pCmd.Input.fireAbility0)
-                {
-                    BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.FireBall, transform.position, Quaternion.identity);
-                    be.gameObject.name = "Fireball(" + controllingPlayer.playerName + ")";
-                    be.GetComponent<FireballTest>().Initialize(transform.position, pCmd.Input.rotationY);
-                }
-            }
+        //if (pCmd.IsFirstExecution && BoltNetwork.isServer)
+        //{
+        //    if (pCmd.Input.fireAbility0)
+        //        UseAbility(0, pCmd.Input.rotationY);
+        //    else if (pCmd.Input.fireAbility1)
+        //        UseAbility(1, pCmd.Input.rotationY);
+        //}
+    }
+
+    void UseAbility(int _index, float _rotation)
+    {
+        if (_index == 0)
+        {
+            Vector3 origin = new Vector3(transform.position.x, characterBaseHeight, transform.position.z);
+            BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.FireBall, new Vector3(-1000f, -1000f, 0f), Quaternion.identity);
+
+            if (controllingPlayer == null)
+                be.gameObject.name = "Fireball(null)";
+            else
+                be.gameObject.name = "Fireball(" + controllingPlayer.playerName + ")";
+
+            be.GetComponent<FireballTest>().Initialize(origin, _rotation);
+        }
+        else
+        {
+            Debug.Log("[UseAbility] Unknown ability index " + _index);
         }
     }
 

@@ -1,3 +1,49 @@
-*
-![Aa]ssets/Scripts
+# =============== #
+# Unity generated #
+# =============== #
+[Tt]emp/
+[Oo]bj/
+[Bb]uild
+[Ll]ibrary/
+sysinfo.txt
+
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+[Ee]xported[Oo]bj/
+/*.userprefs
+/*.csproj
+/*.pidb
+/*.suo
+/*.sln*
+/*.user
+/*.unityproj
+/*.booproj
+*.suo
+ 
+# ============ #
+# OS generated #
+# ============ #
+.DS_Store*
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+[Tt]humbs.db
+
+# ============ #
+# Self		   #
+# ============ #
+[Aa]ssets/*
+![Aa]ssets/Scripts/
+![Aa]ssets/Scripts/*
+!*[Aa]ssets/Scripts/
+[Pp]rojectSettings/
+[Dd]ev/
+[Bb]in/
+backup/
+Bolt_DebugStart_Build/
+_UpgradeReport*
+UpgradeLog.*
 *.meta

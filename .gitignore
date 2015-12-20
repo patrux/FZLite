@@ -35,7 +35,7 @@ ehthumbs.db
 # Self		   #
 # ============ #
 [Aa]ssets/*
-![Aa]ssets/Scripts/
+![Aa]ssets/Scripts/*
 [Pp]rojectSettings/
 [Dd]ev/
 [Bb]in/

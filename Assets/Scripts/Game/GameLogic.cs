@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Bolt;
 
-public class GameLogic : MonoBehaviour 
+public class GameLogic : MonoBehaviour //ASDF
 {
     public static GameLogic instance;
     void Awake() { instance = this; }
@@ -20,7 +20,7 @@ public class GameLogic : MonoBehaviour
     /// </summary>
     [HideInInspector]
     public GameState gameState = GameState.UNCONNECTED;
-
+    
     // References
     [HideInInspector]
     public UIMenuHandler menuHandler;

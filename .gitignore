@@ -5,6 +5,10 @@
 [Oo]bj/
 [Bb]uild
 [Ll]ibrary/
+[Bb]in/
+[Dd]ev/
+[Bb]ackup
+ProjectSettings/
 sysinfo.txt
 
 # ===================================== #
@@ -35,15 +39,17 @@ ehthumbs.db
 # ============ #
 # Self		   #
 # ============ #
-[Aa]ssets/*
-![Aa]ssets/Scripts/
-![Aa]ssets/Scripts/*
-!*[Aa]ssets/Scripts/
-[Pp]rojectSettings/
-[Dd]ev/
-[Bb]in/
-backup/
-Bolt_DebugStart_Build/
-_UpgradeReport*
-UpgradeLog.*
+Assets/Art
+Assets/bolt
+Assets/Gizmos
+Assets/Imported
+Assets/Materials
+Assets/NGUI
+Assets/Plugins
+Assets/Prefabs
+Assets/Resources
+Assets/Scenes
+Assets/Shaders
+Assets/StreamingAssets
+Assets/XInputDotNet
 *.meta

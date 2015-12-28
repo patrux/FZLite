@@ -16,4 +16,9 @@ public class UIScreenGameUI : MonoBehaviour, IMenuScreen
         gameObject.SetActive(false);
         GameObject.Find("UIPanel (MENU)").SetActive(true);
     }
+
+    public GameObject GetGameObject()
+    {
+        return gameObject;
+    }
 }

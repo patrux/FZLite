@@ -6,7 +6,14 @@ using System;
 public class ChatHandler : MonoBehaviour
 {
     public static ChatHandler instance;
-    void Awake() { instance = this; }
+    void Awake()
+    {
+        instance = this;
+        print("[DB] Created.");
+        chatHistory = new ChatHistory(this);
+        handleChatCommand = new HandleChatCommand();
+        GameLogic.instance.chatHandler = this;
+    }
     void OnDestroy() { instance = null; }
 
     /// <summary>
@@ -37,9 +44,9 @@ public class ChatHandler : MonoBehaviour
 
     void Start()
     {
-        chatHistory = new ChatHistory(this);
-        handleChatCommand = new HandleChatCommand();
-        GameLogic.instance.chatHandler = this;
+        //chatHistory = new ChatHistory(this);
+        //handleChatCommand = new HandleChatCommand();
+        //GameLogic.instance.chatHandler = this;
     }
 
     public void RegisterChatSource(ChatSource.ChatSourceInfo _csi)

@@ -27,10 +27,15 @@ public class ServerCallbacks : Bolt.GlobalEventListener
             if (netPlayer.playerID != np.playerID) // if not self
                 np.CreateNewNetPlayerEvent(netPlayer.connection);
 
+        GameLogic.instance.chatHandler.AddLocalMessage(netPlayer.playerName + " has connected.");
+
         // Check for dev auto-start
         if (DevQuickStart.AutoStart())
             if (GameLogic.instance.GetNetPlayerList().Count >= DevQuickStart.AutoStartCount())
+            {
+                GameLogic.instance.chatHandler.AddLocalMessage("Auto-Starting.");
                 BoltNetwork.LoadScene("TestMap");
+            }
     }
 
     public override void OnEvent(evJoinTeam _ev)

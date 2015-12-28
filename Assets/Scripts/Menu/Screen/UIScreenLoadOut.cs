@@ -28,4 +28,9 @@ public class UIScreenLoadOut : MonoBehaviour, IMenuScreen
 
         gameObject.SetActive(false);
     }
+
+    public GameObject GetGameObject()
+    {
+        return gameObject;
+    }
 }

@@ -55,6 +55,18 @@ public class GameLogic : MonoBehaviour
         chatHandler = GameObject.Find("GlobalScripts").GetComponent<ChatHandler>();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            print("*** Listing NetPlayers ***");
+            foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
+            {
+                print("NP: " + np.ToString());
+            }
+        }
+    }
+
     /// <summary>
     /// Outputs all the LobbySlots to chat log.
     /// </summary>

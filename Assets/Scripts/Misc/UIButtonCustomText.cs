@@ -4,7 +4,6 @@ using System.Collections;
 public class UIButtonCustomText : MonoBehaviour
 {
     public UILabel label;
-    public UISprite patternSprite;
 
     Vector2 floatingDistance;
 

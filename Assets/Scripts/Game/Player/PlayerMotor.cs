@@ -102,7 +102,7 @@ public class PlayerMotor : MonoBehaviour
         transform.localPosition = _state.position;
     }
 
-    void Move(Vector3 velocity)
+    public void Move(Vector3 velocity)
     {
         bool isGrounded = false;
 

@@ -19,7 +19,7 @@ public class ChatSource : MonoBehaviour
         public UIScrollBar scrollBar;
     }
 
-    void Start()
+    void Awake()
     {
         csi.input = GameObject.Find("Chat Input/").GetComponent<UIInput>();
         csi.textList = GameObject.Find("Chat Area/").GetComponent<UITextList>();

@@ -8,6 +8,7 @@ public class UIScreenPlay : MonoBehaviour, IMenuScreen
 
     public UIInput inputIP;
     public UIInput inputPort;
+    public UIInput inputHostPort;
 
     void Start()
     {
@@ -15,6 +16,7 @@ public class UIScreenPlay : MonoBehaviour, IMenuScreen
 
         inputIP.value = PlayerSettings.GetIP();
         inputPort.value = "" + PlayerSettings.GetPort();
+        inputHostPort.value = "" + PlayerSettings.GetHostPort();
     }
 
     public void Show()
@@ -33,15 +35,20 @@ public class UIScreenPlay : MonoBehaviour, IMenuScreen
         gameObject.SetActive(false);
     }
 
+    public GameObject GetGameObject()
+    {
+        return gameObject;
+    }
+
     public void OnButton_Host()
     {
         if (BoltNetwork.isRunning)
             BoltLauncher.Shutdown();
 
-        if (CheckValidPort())
-            networkHandler.CreateServer(int.Parse(inputPort.value));
+        if (CheckValidPort(int.Parse(inputHostPort.value).ToString()))
+            networkHandler.CreateServer(int.Parse(inputHostPort.value));
         else
-            UIMenuConsole.WriteConsole("Invalid Port.");
+            UIMenuConsole.WriteConsole("Invalid Host Port.");
     }
 
     public void OnButton_Join()
@@ -49,25 +56,25 @@ public class UIScreenPlay : MonoBehaviour, IMenuScreen
         if (BoltNetwork.isRunning)
             BoltLauncher.Shutdown();
 
-        if (CheckValidIP() && CheckValidPort())
+        if (CheckValidIP(inputIP.value) && CheckValidPort(int.Parse(inputPort.value).ToString()))
             networkHandler.JoinServer(inputIP.value, int.Parse(inputPort.value));
         else
             UIMenuConsole.WriteConsole("Invalid IP or Port.");
     }
 
-    bool CheckValidIP()
+    bool CheckValidIP(string _value)
     {
         // Regex pattern matching standard IP adresses
         string regexPattern = @"\b(([01]?\d?\d|2[0-4]\d|25[0-5])\.){3}([01]?\d?\d|2[0-4]\d|25[0-5])\b";
-        Match match = Regex.Match(inputIP.value, regexPattern);
+        Match match = Regex.Match(_value, regexPattern);
         return match.Success;
     }
 
-    bool CheckValidPort()
+    bool CheckValidPort(string _value)
     {
         // Regex pattern matching standard Ports
         string regexPattern = @"^\s*-?[0-9]{2,5}\s*$";
-        Match match = Regex.Match(inputPort.value, regexPattern);
+        Match match = Regex.Match(_value, regexPattern);
         return match.Success;
     }
 }

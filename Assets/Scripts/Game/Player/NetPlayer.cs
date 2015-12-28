@@ -26,6 +26,11 @@ public class NetPlayer
     public BoltConnection connection = null;
 
     /// <summary>
+    /// The entity owned by this player
+    /// </summary>
+    public PlayerController playerController = null;
+
+    /// <summary>
     /// Lobby ready status.
     /// </summary>
     public bool isReady;
@@ -160,6 +165,8 @@ public class NetPlayer
         foreach (NetPlayer np in GameLogic.instance.GetNetPlayerList())
             if (_playerID == np.playerID)
                 return np;
+
+        Debug.Log("WARNING: GetNetPlayer returned null");
         return null;
     }
 
@@ -210,5 +217,5 @@ public class NetPlayer
         return (netPlayerMatch != null);
     }
 
-    public string ToString() { return "playerName[" + playerName + "] slotID[" + slotID + "] playerID[" + playerID + "] connection[" + connection + "]"; }
+    public override string ToString() { return "playerName[" + playerName + "] slotID[" + slotID + "] playerID[" + playerID + "] controller[" + playerController + "] connection[" + connection + "]"; }
 }

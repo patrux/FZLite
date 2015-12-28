@@ -49,6 +49,7 @@ public class PlayerSettings : MonoBehaviour
     SettingsValue sensitivity = new SettingsValue("sensitivity", "1.0", "1.0");
     SettingsValue ip = new SettingsValue("ip", "127.0.0.1", "127.0.0.1");
     SettingsValue port = new SettingsValue("port", "1337", "1337");
+    SettingsValue hostPort = new SettingsValue("hostport", "1337", "1337");
 
     // Keybinds
     string keyBindPrefix = "keybind_";
@@ -91,6 +92,7 @@ public class PlayerSettings : MonoBehaviour
         sensitivity.SetDefaultValue();
         ip.SetDefaultValue();
         port.SetDefaultValue();
+        hostPort.SetDefaultValue();
 
         // Keybinds
         keyMoveUp = KeyCode.W;
@@ -115,6 +117,7 @@ public class PlayerSettings : MonoBehaviour
         sensitivity.LoadValue(xdoc);
         ip.LoadValue(xdoc);
         port.LoadValue(xdoc);
+        hostPort.LoadValue(xdoc);
 
         // Keybinds
         keyMoveUp = GetKeybind("moveup", xdoc);
@@ -157,6 +160,7 @@ public class PlayerSettings : MonoBehaviour
         sensitivity.SaveValue(xdoc);
         ip.SaveValue(xdoc);
         port.SaveValue(xdoc);
+        hostPort.SaveValue(xdoc);
 
         xdoc.Save(path);
     }
@@ -232,6 +236,26 @@ public class PlayerSettings : MonoBehaviour
     {
         if (instance != null)
                 return int.Parse(instance.port.GetValue());
+        else
+            return 0;
+    }
+
+    /// <summary>
+    /// Host Port
+    /// </summary>
+    static public void SetHostPort(int _value)
+    {
+        if (instance != null)
+            instance.hostPort.SetValue("" + _value);
+    }
+
+    /// <summary>
+    /// This may return an error if the port couldn't be parsed.
+    /// </summary>
+    static public int GetHostPort()
+    {
+        if (instance != null)
+            return int.Parse(instance.hostPort.GetValue());
         else
             return 0;
     }

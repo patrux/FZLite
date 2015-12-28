@@ -65,6 +65,7 @@ public class NetworkHandler : Bolt.GlobalEventListener
             // Load server GUI screen here
             PlayerSettings.SetPlayerName("Server");
             GameLogic.instance.menuHandler.SetScreenServer();
+            GameLogic.instance.chatHandler.AddLocalMessage("Waiting for players to join.");
         }
         else if (BoltNetwork.isClient)
         {

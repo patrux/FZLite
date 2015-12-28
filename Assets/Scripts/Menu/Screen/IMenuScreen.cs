@@ -5,4 +5,5 @@ public interface IMenuScreen
 {
     void Show();
     void Hide();
+    GameObject GetGameObject();
 }

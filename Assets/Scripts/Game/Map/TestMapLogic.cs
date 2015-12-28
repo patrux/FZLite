@@ -27,6 +27,10 @@ public class TestMapLogic : Bolt.GlobalEventListener
 
             BoltEntity be = BoltNetwork.Instantiate(BoltPrefabs.Player, GetStartingPosition(p), Quaternion.identity);
             be.gameObject.name = "Player(" + p.playerName + ")";
+            PlayerController pc = be.GetComponent<PlayerController>();
+            p.playerController = pc;
+            pc.controllingPlayer = p;
+
 
             ControlToken ct = new ControlToken();
             ct.playerID = p.playerID;

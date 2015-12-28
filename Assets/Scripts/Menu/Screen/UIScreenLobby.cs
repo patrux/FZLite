@@ -37,6 +37,11 @@ public class UIScreenLobby : MonoBehaviour, IMenuScreen
         gameObject.SetActive(false);
     }
 
+    public GameObject GetGameObject()
+    {
+        return gameObject;
+    }
+
     public void Button_JoinRedTeam() { teamRed = true; OnJoinTeam(); }
     public void Button_JoinBlueTeam() { teamRed = false; OnJoinTeam(); }
 

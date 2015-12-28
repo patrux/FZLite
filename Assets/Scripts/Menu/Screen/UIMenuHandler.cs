@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class UIMenuHandler : MonoBehaviour 
+public class UIMenuHandler : MonoBehaviour
 {
     // Singleton
     static public UIMenuHandler instance;
@@ -9,9 +9,8 @@ public class UIMenuHandler : MonoBehaviour
     void OnDestroy() { instance = null; }
 
     // The menu screens
-    public UIScreenMain screenMain;
-    public UIScreenLoadOut screenLoadOut;
     public UIScreenPlay screenPlay;
+    public UIScreenLoadOut screenLoadOut;
     public UIScreenLobby screenLobby;
     public UIScreenServer screenServer;
     public UIScreenGameUI screenGameUI;
@@ -19,71 +18,80 @@ public class UIMenuHandler : MonoBehaviour
     // Current active screen
     IMenuScreen activeScreen;
 
-	void Start () 
+    void Start()
     {
-        // Set default screen
-        GameObject mainScreen = GameObject.Find("MainScreen");
-        if (mainScreen != null)
-            activeScreen = mainScreen.GetComponent<UIScreenMain>();
-	}
-
-    public void OnButton_CloseScreen()
-    {
-        if (activeScreen != null)
+        // Find the currently active screen
+        if (activeScreen == null)
         {
-            activeScreen.Hide();
-            activeScreen = screenMain;
-            activeScreen.Show();
+            if (CheckDefaultActiveScreen(screenPlay)) { }
+            else if (CheckDefaultActiveScreen(screenLoadOut)) { }
+            else if (CheckDefaultActiveScreen(screenLobby)) { }
+            else if (CheckDefaultActiveScreen(screenServer)) { }
+            else if (CheckDefaultActiveScreen(screenGameUI)) { }
         }
-    }
 
-    public void OnButton_LoadOut()
-    {
-        if (activeScreen != null)
-        {
-            activeScreen.Hide();
-            activeScreen = screenLoadOut;
-            activeScreen.Show();
-        }
+        print("Set Default screen to " + activeScreen);
     }
 
     public void OnButton_Play()
     {
-        if (activeScreen != null)
-        {
-            activeScreen.Hide();
-            activeScreen = screenPlay;
-            activeScreen.Show();
-        }
+        SwitchScreen(screenPlay);
+    }
+
+    public void OnButton_LoadOut()
+    {
+        SwitchScreen(screenLoadOut);
+    }
+
+    public void OnButton_Options()
+    {
+        // Reload settings
+        PlayerSettings.instance.LoadSettings();
+
+        // Opens the options file in the default text editor
+        string playerSettingsPath = Application.streamingAssetsPath + "\\" + "PlayerSettings.xml";
+        System.Diagnostics.Process.Start(playerSettingsPath);
+    }
+
+    public void OnButton_Exit()
+    {
+        // Discnnect and go to main menu if in a game
+        Application.Quit();
     }
 
     public void SetScreenLobby()
     {
-        if (activeScreen != null)
-        {
-            activeScreen.Hide();
-            activeScreen = screenLobby;
-            activeScreen.Show();
-        }
+        SwitchScreen(screenLobby);
     }
 
     public void SetScreenServer()
     {
-        if (activeScreen != null)
-        {
-            activeScreen.Hide();
-            activeScreen = screenServer;
-            activeScreen.Show();
-        }
+        SwitchScreen(screenServer);
     }
 
     public void SetScreenGameUI()
     {
+        SwitchScreen(screenGameUI);
+    }
+
+    void SwitchScreen(IMenuScreen _menuScreen)
+    {
         if (activeScreen != null)
-        {
             activeScreen.Hide();
-            activeScreen = screenGameUI;
+
+        activeScreen = _menuScreen;
+
+        if (activeScreen != null)
             activeScreen.Show();
+    }
+
+    bool CheckDefaultActiveScreen(IMenuScreen _menuScreen)
+    {
+        if (_menuScreen.GetGameObject().activeSelf)
+        {
+            activeScreen = _menuScreen;
+            return true;
         }
+        return false;
     }
 }
